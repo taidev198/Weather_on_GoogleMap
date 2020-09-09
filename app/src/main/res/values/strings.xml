@@ -9,4 +9,65 @@
 
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
+    <string name="title_splash">Weather for you</string>
+    <string name="title_today">Today</string>
+    <string name="title_hourly">Hourly</string>
+    <string name="title_daily">Daily</string>
+    <string name="title_air_quality">Air Quality</string>
+    <string name="title_air_quality_index">Air Quality Index</string>
+
+    <string name="default_address">Hanoi</string>
+
+    <string name="default_current_temp">17°</string>
+    <string name="default_daily_temp">29° / 14°</string>
+    <string name="default_temp_max">29°</string>
+    <string name="default_temp_min">14°</string>
+
+    <string name="default_current_weather">Clear</string>
+    <string name="default_weather_daily">Partly cloudy throughout the day.</string>
+
+    <string name="default_time">18:00</string>
+    <string name="default_date">2019, Fri Dec 13</string>
+    <string name="default_day">Dec 13</string>
+    <string name="default_day_EEE">Fri, Dec 13</string>
+    <string name="default_day_in_week">Fri</string>
+
+    <string name="default_progress">50</string>
+    <string name="default_status_aq">Very Unhealthy</string>
+    <string name="default_number_aq">250</string>
+    <string name="default_content_aq">General public will be noticeably affected.
+        Sensitive groups will experience reduced endurance in activities.
+        These individuals should remain indoors and restrict activities.</string>
+
+    <string name="error_server">Error Server</string>
+    <string name="status_good">Good</string>
+    <string name="status_moderate">Moderate</string>
+    <string name="status_unhealthy_for_sensitive">Unhealthy for Sensitive Groups</string>
+    <string name="status_unhealthy">Unhealthy</string>
+    <string name="status_very_unhealthy">Very Unhealthy</string>
+    <string name="status_hazardous">Hazardous</string>
+
+    <string name="content_good">Air quality is satisfactory and poses little or no health risk.
+        Ventilating your home is recommended.</string>
+    <string name="content_moderate">Air quality is acceptable and poses little health risk.
+        Sensitive individuals should avoid outdoor activity
+        as they may experience respiratory symptoms.</string>
+    <string name="content_unhealthy_for_sensitive">General public and sensitive individuals
+        in particular are at risk to experience irritation and respiratory problems.</string>
+    <string name="content_unhealthy">Increased likelihood of adverse effects
+        and aggravation to the heart and lungs among
+        general public - particularly for sensitive groups.</string>
+    <string name="content_very_unhealthy">General public will be noticeably affected.
+        Sensitive groups will experience reduced endurance in activities.
+        These individuals should remain indoors and restrict activities.</string>
+    <string name="content_hazardous">General public and sensitive groups are
+        at high risk to experience strong irritations and adverse health effects
+        that could trigger other illnesses.
+        Everyone should avoid exercise and remain indoors.</string>
+
+    <string name="icon_weather">Weather Icon</string>
+    <string name="icon_temp_max">Icon Temp Max</string>
+    <string name="icon_temp_min">Icon Temp Min</string>
+    <string name="icon_redirect_load_all">Load all</string>
+    <string name="icon_air_quality">Icon Air Quality</string>
 </resources>

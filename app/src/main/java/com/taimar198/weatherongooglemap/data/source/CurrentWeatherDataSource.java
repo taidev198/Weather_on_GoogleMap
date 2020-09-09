@@ -2,7 +2,7 @@ package com.taimar198.weatherongooglemap.data.source;
 
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 
-public interface CurrentWeatherDataResource {
+public interface CurrentWeatherDataSource {
 
     interface OnFetchDataListener {
         void onFetchDataSuccess(CurrentWeather data);

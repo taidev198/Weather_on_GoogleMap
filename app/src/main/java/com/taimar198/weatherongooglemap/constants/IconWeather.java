@@ -1,4 +1,4 @@
 package com.taimar198.weatherongooglemap.constants;
 
-public @interface IconEntity {
+public @interface IconWeather {
 }

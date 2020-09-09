@@ -1,11 +1,17 @@
 package com.taimar198.weatherongooglemap.constants;
 
-public class Constant {
+public class Constants {
 
-    public static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
-    public static final String BASE_URL_AQI = "http://api.waqi.info/feed/geo:";
-    public static final String APP_ID = "&appid=";
+    public static final String SCHEME = "https";
+    public static final String BASE_URL = "api.openweathermap.org/data";
+    public static final String VERSION = "2.5";
+    public static final String WEATHER = "weather";
+    public static final String API_KEY = "apikey";
+    public static final String APP_ID = "appid";
 
+
+    public static final String LAT = "lat";
+    public static final String LON = "lon";
     public static final String REQUEST_METHOD_GET = "GET";
     public static final int CONNECT_TIME_OUT = 5000;
     public static final int READ_TIME_OUT = 5000;
@@ -22,6 +28,7 @@ public class Constant {
 
     public static final String DEGREE = "°";
     public static final String SLASH = "/";
+    public static final String ques = "?";
 
     public static final int INDEX_0 = 0;
     public static final int INDEX_1 = 1;

@@ -11,11 +11,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
+import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
+import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 
-public class MainActivity extends AppCompatActivity implements OnMapReadyCallback {
+public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,  CurrentWeatherDataSource.OnFetchDataListener {
 
     private GoogleMap mMap;
-
+    private CurrentWeatherRepository mCurrentWeatherRepository;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -24,6 +27,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
+        mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
     }
 
     /**
@@ -46,5 +51,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .position(sydney)
                 .title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    public void onFetchDataSuccess(CurrentWeather data) {
+        System.out.println("data"+data.getDate());
+    }
+
+    @Override
+    public void onFetchDataFailure(Exception e) {
+
     }
 }
