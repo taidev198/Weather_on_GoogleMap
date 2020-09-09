@@ -8,6 +8,7 @@ public class Constants {
     public static final String WEATHER = "weather";
     public static final String API_KEY = "apikey";
     public static final String APP_ID = "appid";
+    public static final String IMG_URL = "https://openweathermap.org/img/wn/";//+@2x is size of img
 
 
     public static final String LAT = "lat";

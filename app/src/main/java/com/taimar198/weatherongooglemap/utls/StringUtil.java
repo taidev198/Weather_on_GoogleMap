@@ -11,7 +11,8 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class StringUtil {
-
+/**Weather icon: https://openweathermap.org/weather-conditions#Weather-Condition-Codes-2
+ * Link get icon:http://openweathermap.org/img/wn/10d@2x.png*/
     public static String formatWeatherAPI(String lat, String lon) {
         Uri.Builder urlBuilder = new Uri.Builder();
         urlBuilder.scheme(Constants.SCHEME)

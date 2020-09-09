@@ -13,6 +13,6 @@ public @interface CurrentWeatherEntity {
     String CURRENT_OBJECT = "currently";
     String TIME = "time";
     String TEMP = "temperature";
-    String WEATHER = "summary";
+    String WEATHER = "weather";
     String ICON = "icon";
 }

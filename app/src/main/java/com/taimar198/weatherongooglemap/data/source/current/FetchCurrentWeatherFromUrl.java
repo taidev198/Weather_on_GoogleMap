@@ -6,7 +6,9 @@ import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.constants.CurrentWeatherEntity;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
+import com.taimar198.weatherongooglemap.utls.JSONWeatherParser;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -32,7 +34,7 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
         try {
             String data = getStringDataFromUrl(url);
 
-            return getCurrentWeatherFromStringData(data);
+            return  JSONWeatherParser.getWeather(data);
         } catch (IOException e) {
             mException = e;
         } catch (JSONException e) {
@@ -43,20 +45,8 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
 
     private CurrentWeather getCurrentWeatherFromStringData(String data) throws JSONException {
         JSONObject jsonObject = new JSONObject(data);
-        JSONObject currently = jsonObject.getJSONObject(CurrentWeatherEntity.CURRENT_OBJECT);
 
-        String time = currently.getString(CurrentWeatherEntity.TIME);
-        Date date = new Date(Long.parseLong(time) * Constants.TIME_DETAL);
-
-        String temperature = currently.getString(CurrentWeatherEntity.TEMP);
-        int temp = Math.round(Float.parseFloat(temperature));
-
-        String weather = currently.getString(CurrentWeatherEntity.WEATHER);
-        String icon = currently.getString(CurrentWeatherEntity.ICON);
-
-        CurrentWeather currentWeather = new CurrentWeather(date, temp, weather, icon);
-
-        return currentWeather;
+        return null;
     }
 
     private String getStringDataFromUrl(String urlString) throws IOException {
@@ -74,6 +64,7 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
             sb.append(line).append(Constants.BREAK_LINE);
         }
         br.close();
+        System.out.println("done");
         connection.disconnect();
         return sb.toString();
     }

@@ -1,21 +1,35 @@
 package com.taimar198.weatherongooglemap.data.model;
 
+import android.graphics.Bitmap;
+
 import java.util.Date;
 
 public class CurrentWeather {
     private Date mDate;
     private int mTemp;
     private String mWeather;
-    private String mIcon;
+    private Location location;
+    // Downloaded separately
+    private Bitmap mIcon;
+
 
     public CurrentWeather() {
+        location = new Location();
     }
 
-    public CurrentWeather(Date date, int temp, String weather, String icon) {
+    public CurrentWeather(Date date, int temp, String weather, Bitmap icon) {
         mDate = date;
         mTemp = temp;
         mWeather = weather;
         mIcon = icon;
+    }
+
+    public Location getLocation() {
+        return location;
+    }
+
+    public void setLocation(Location location) {
+        this.location = location;
     }
 
     public Date getDate() {
@@ -42,11 +56,11 @@ public class CurrentWeather {
         mWeather = weather;
     }
 
-    public String getIcon() {
+    public Bitmap getIcon() {
         return mIcon;
     }
 
-    public void setIcon(String icon) {
+    public void setIcon(Bitmap icon) {
         mIcon = icon;
     }
 }
