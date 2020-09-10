@@ -1,62 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.MainActivity">
 
+
+
     <fragment
+        android:id="@+id/map"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:id="@+id/map"
-        tools:context=".ui.main.MainActivity"
-        android:name="com.google.android.gms.maps.SupportMapFragment"/>
-
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/dp_2"
-        android:layout_marginTop="@dimen/dp_2"
-        android:background="?attr/colorPrimary"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="?attr/actionBarTheme"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" >
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:context=".ui.main.MainActivity" >
+        tools:context=".ui.main.MainActivity" />
+    <fragment
+        android:id="@+id/autocomplete_fragment"
+        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <!--    <androidx.appcompat.widget.Toolbar-->
+<!--        android:id="@+id/toolbar"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginStart="@dimen/dp_2"-->
+<!--        android:layout_marginTop="@dimen/dp_2"-->
+<!--        android:background="?attr/colorPrimary"-->
+<!--        android:minHeight="?attr/actionBarSize"-->
+<!--        android:theme="?attr/actionBarTheme"-->
+<!--        app:layout_constraintEnd_toEndOf="parent"-->
+<!--        app:layout_constraintStart_toStartOf="parent"-->
+<!--        app:layout_constraintTop_toTopOf="parent" >-->
+<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
+<!--            android:layout_width="match_parent"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            tools:context=".ui.main.MainActivity" >-->
 
-<!--            <ImageView-->
-<!--                android:id="@+id/image_back_button"-->
-<!--                android:layout_width="@dimen/dp_24"-->
-<!--                android:layout_height="@dimen/dp_24"-->
-<!--                android:layout_marginTop="@dimen/dp_8"-->
-<!--                android:layout_marginBottom="@dimen/dp_8"-->
-<!--                android:adjustViewBounds="true"-->
-<!--                android:src="@drawable/ic_left_arrow"-->
+<!--&lt;!&ndash;            <ImageView&ndash;&gt;-->
+<!--&lt;!&ndash;                android:id="@+id/image_back_button"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_width="@dimen/dp_24"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_height="@dimen/dp_24"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_marginTop="@dimen/dp_8"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:layout_marginBottom="@dimen/dp_8"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:adjustViewBounds="true"&ndash;&gt;-->
+<!--&lt;!&ndash;                android:src="@drawable/ic_left_arrow"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:layout_constraintBottom_toBottomOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
+<!--&lt;!&ndash;                app:layout_constraintTop_toTopOf="parent" />&ndash;&gt;-->
+
+<!--            <SearchView-->
+<!--                android:id="@+id/search_view"-->
+<!--                android:layout_width="wrap_content"-->
+<!--                android:layout_height="wrap_content"-->
+<!--                android:iconifiedByDefault="false"-->
+<!--                android:layoutDirection="rtl"-->
+<!--                android:queryHint="@string/text_search_hint"-->
+<!--                android:searchIcon="@null"-->
 <!--                app:layout_constraintBottom_toBottomOf="parent"-->
+<!--                app:layout_constraintEnd_toEndOf="parent"-->
 <!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent" />-->
-
-            <SearchView
-                android:id="@+id/search_view"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:iconifiedByDefault="false"
-                android:layoutDirection="rtl"
-                android:queryHint="@string/text_search_hint"
-                android:searchIcon="@null"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:queryBackground="@android:color/transparent" />
-        </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.appcompat.widget.Toolbar>
+<!--                app:layout_constraintTop_toTopOf="parent"-->
+<!--                app:queryBackground="@android:color/transparent" />-->
+<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
+<!--    </androidx.appcompat.widget.Toolbar>-->
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

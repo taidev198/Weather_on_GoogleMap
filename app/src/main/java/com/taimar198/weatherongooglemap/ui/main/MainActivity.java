@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
@@ -24,6 +25,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
+
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -33,6 +37,7 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -40,15 +45,23 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.api.net.PlacesClient;
+import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
+import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
+import com.taimar198.weatherongooglemap.ui.map.MapContract;
 import com.taimar198.weatherongooglemap.ui.search.SearchContract;
 import com.taimar198.weatherongooglemap.ui.search.SearchPresenter;
 
+import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -58,6 +71,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**https://guides.codepath.com/android/Google-Maps-API-v2-Usage*/
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -65,8 +79,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        SearchContract.View,
-        SearchView.OnQueryTextListener {
+        SearchView.OnQueryTextListener, MapContract.View {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private GoogleMap mMap;
@@ -74,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private SearchPresenter mSearchPresenter;
     private SearchView mSearchView;
     private Circle circle;
+    private PlaceAutocompleteFragment placeAutoComplete;
 
     TileProvider tileProvider = new UrlTileProvider(256, 256) {
         @Override
@@ -113,6 +127,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     };
 
     TileOverlay tileOverlay ;
+    private PlacesClient placesClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -125,13 +140,43 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void init() {
         addAction();
+        String apiKey = "AIzaSyBTcsNmbllmjlhi_7LQUEyXPPLE3CbZ2vw";
+        if (!Places.isInitialized()) {
+            Places.initialize(getApplicationContext(), apiKey);
+        }
+
+        // Create a new Places client instance.
+        placesClient = Places.createClient(this);
+        // Initialize the AutocompleteSupportFragment.
+
+        AutocompleteSupportFragment autocompleteFragment = (AutocompleteSupportFragment)
+                getSupportFragmentManager().findFragmentById(R.id.autocomplete_fragment);
+
+        // Specify the types of place data to return.
+        autocompleteFragment.setTypeFilter(TypeFilter.CITIES);
+        autocompleteFragment.setPlaceFields(Arrays.asList(Place.Field.ID, Place.Field.NAME));
+
+        // Set up a PlaceSelectionListener to handle the response.
+        autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
+
+            @Override
+            public void onPlaceSelected(@NonNull Place place) {
+                System.out.println("done");
+            }
+
+            @Override
+            public void onError(@NonNull Status status) {
+
+            }
+        });
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mSearchView = findViewById(R.id.search_view);
+
+//        mSearchView = findViewById(R.id.search_view);
         mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
-        mSearchPresenter = new SearchPresenter(this, mCurrentWeatherRepository);
-        mSearchPresenter.start();
+//        mSearchPresenter = new SearchPresenter(this, mCurrentWeatherRepository);
+//        mSearchPresenter.start();
         mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
 
     }
@@ -245,8 +290,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         LatLng hanoi = new LatLng(21.027763, 105.834160);
-        mMap.addMarker(new MarkerOptions()
-        .position(hanoi));
+        Marker marker = mMap.addMarker(new MarkerOptions()
+        .position(hanoi)
+                .title("Ha Noi")
+                .snippet("Description"));
+        marker.showInfoWindow();
 //        mMap.addMarker(new MarkerOptions()
 //                .position(hanoi)
 //                .title("Ha Noi")
@@ -360,49 +408,30 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         return false;
     }
 
-    @Override
-    public void showIntroSearch() {
-
-    }
-
-    @Override
-    public void hideIntroSearch() {
-
-    }
-
-    @Override
-    public void showProgressBar() {
-
-    }
-
-    @Override
-    public void hideProgressBar() {
-
-    }
-
-    @Override
-    public void showSearchResult(CurrentWeather currentWeather) {
-
-    }
-
-    @Override
-    public void showError(String errMsg) {
-
-    }
-
-    @Override
-    public void showSuccess(String msg) {
-
-    }
-
-    @Override
-    public void setPresenter(SearchContract.Presenter presenter) {
-
-    }
 //add action to searchview
     private void addAction() {
         SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
 //        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 //        mSearchView.setOnQueryTextListener(this);
+    }
+
+    @Override
+    public void loadMap() {
+
+    }
+
+    @Override
+    public void showLocationPermissionNeeded() {
+
+    }
+
+    @Override
+    public void addMarkerToMap(MarkerOptions options, LatLng latLng) {
+
+    }
+
+    @Override
+    public void setPresenter(MapContract.Presenter presenter) {
+
     }
 }
