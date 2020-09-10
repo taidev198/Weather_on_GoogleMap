@@ -22,7 +22,6 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter{
         mCurrentWeather = currentWeather;
     }
 
-    @SuppressLint("SetTextI18n")
     @Override
     public View getInfoWindow(Marker marker) {
         // Getting view from the layout file
@@ -36,8 +35,8 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter{
 
         TextView description =  v.findViewById(R.id.des_text);
         description.setText(mCurrentWeather.getWeather());
-        TextView temp = v.findViewById(R.id.temp);
-        temp.setText((int) mCurrentWeather.getTemp().getTemperature()+ Constants.DEGREE);
+//        TextView temp = v.findViewById(R.id.temp);
+//        temp.setText((int) mCurrentWeather.getTemp().getTemperature()+ Constants.DEGREE);
         TextView location = v.findViewById(R.id.location);
         location.setText(mCurrentWeather.getLocation().getCity());
         // Return info window contents

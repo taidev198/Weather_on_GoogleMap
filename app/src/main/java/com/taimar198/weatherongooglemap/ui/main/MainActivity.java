@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -28,15 +29,36 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.CircleOptions;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.gms.maps.model.UrlTileProvider;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
+import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.ui.search.SearchContract;
 import com.taimar198.weatherongooglemap.ui.search.SearchPresenter;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
+
 /**https://guides.codepath.com/android/Google-Maps-API-v2-Usage*/
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         CurrentWeatherDataSource.OnFetchDataListener,
@@ -51,6 +73,46 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private CurrentWeatherRepository mCurrentWeatherRepository;
     private SearchPresenter mSearchPresenter;
     private SearchView mSearchView;
+    private Circle circle;
+
+    TileProvider tileProvider = new UrlTileProvider(256, 256) {
+        @Override
+        public URL getTileUrl(int x, int y, int zoom) {
+
+            /* Define the URL pattern for the tile images */
+            String s = String.format("https://openweathermap.org/img/wn/10d@2x.png",
+                    zoom, x, y);
+
+//            if (!checkTileExists(x, y, zoom)) {
+//                return null;
+//            }
+
+            try {
+                return new URL(s);
+            } catch (MalformedURLException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        /*
+         * Check that the tile server supports the requested x, y and zoom.
+         * Complete this stub according to the tile range you support.
+         * If you support a limited range of tiles at different zoom levels, then you
+         * need to define the supported x, y range at each zoom level.
+         */
+        private boolean checkTileExists(int x, int y, int zoom) {
+            int minZoom = 12;
+            int maxZoom = 16;
+
+            if ((zoom < minZoom || zoom > maxZoom)) {
+                return false;
+            }
+
+            return true;
+        }
+    };
+
+    TileOverlay tileOverlay ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -108,6 +170,37 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // position on right bottom
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);rlp.setMargins(0,0,30,30);
+        circle = mMap.addCircle(new CircleOptions()
+                .center(new LatLng(21.027763, 105.834160))
+                .radius(1000)
+                .strokeWidth(10)
+                .strokeColor(Color.GREEN)
+                .fillColor(Color.argb(128, 255, 0, 0))
+                .clickable(true));
+
+        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
+            @Override
+            public void onCircleClick(Circle circle) {
+                // Flip the r, g and b components of the circle's
+                // stroke color.
+                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+                circle.setStrokeColor(strokeColor);
+            }
+        });
+        Polyline line = mMap.addPolyline(new PolylineOptions()
+                .add(new LatLng(-37.81319, 144.96298), new LatLng(-31.95285, 115.85734))
+                .width(25)
+                .color(Color.BLUE)
+                .geodesic(true));
+        LatLng NEWARK = new LatLng(21.027763, 105.834160);
+
+//        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+//                .image(BitmapDescriptorFactory.fromResource(R.drawable.custom_marker))
+//                .position(NEWARK, 8600f, 6500f);
+//        mMap.addGroundOverlay(newarkMap);
+//        tileOverlay = mMap.addTileOverlay(new TileOverlayOptions()
+//                .tileProvider(tileProvider)
+//                .transparency(0.5f));
     }
 
     private void setOnClick() {
@@ -149,12 +242,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap = googleMap;
         checkPermission();
         setOnClick();
-        View markerView = ((LayoutInflater)getSystemService(
-                        Context.LAYOUT_INFLATER_SERVICE))
-                .inflate(R.layout.activity_main2, null);
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
-        LatLng hanoi = new LatLng(21, 105);
+        LatLng hanoi = new LatLng(21.027763, 105.834160);
         mMap.addMarker(new MarkerOptions()
         .position(hanoi));
 //        mMap.addMarker(new MarkerOptions()
@@ -165,8 +255,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        .fromBitmap(createDrawableFromView(
 //                                this,
 //                                markerView))));
-
         mMap.animateCamera(CameraUpdateFactory.newLatLng(hanoi));
+        try {
+            ArrayList<WeightedLatLng> result = generateHeatMapData();
+//            new CrimeData().getWeightedPositions();
+            HeatmapTileProvider heatmapTileProvider = new HeatmapTileProvider.Builder()
+                    .weightedData(result) // load our weighted data
+                    .radius(50) // optional, in pixels, can be anything between 20 and 50
+                    .maxIntensity(1000.0) // set the maximum intensity
+                    .build();
+            mMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatmapTileProvider));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public void updateTileOverlayTransparency() {
+        if (tileOverlay != null) {
+            // Switch between 0.0f and 0.5f transparency.
+            tileOverlay.setTransparency(0.5f - tileOverlay.getTransparency());
+        }
+    }
+
+    private ArrayList<WeightedLatLng> generateHeatMapData() throws JSONException {
+         ArrayList<WeightedLatLng> result = new ArrayList<>();
+
+        JSONArray jsonData = getJsonDataFromAsset("data.json");
+        for (int i =0; i< jsonData.length(); i++){
+
+            JSONObject jsonObject = jsonData.getJSONObject(i);
+                double lat = jsonObject.getDouble("lat");
+            double lon = jsonObject.getDouble("lon");
+            double density = jsonObject.getDouble("density");
+
+                if (density != 0.0) {
+                    WeightedLatLng weightedLatLng = new WeightedLatLng(new LatLng(lat, lon), density);
+                    result.add(weightedLatLng);
+                }
+            }
+        return result;
+    }
+
+
+    private JSONArray getJsonDataFromAsset(String fileName) throws JSONException {
+        String json = null;
+        try {
+            InputStream is = this.getAssets().open(fileName);
+            int size = is.available();
+            byte[] buffer = new byte[size];
+            is.read(buffer);
+            is.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return new JSONArray(json);
     }
 
     private Bitmap createDrawableFromView(Context context, View view) {
