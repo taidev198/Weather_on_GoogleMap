@@ -22,4 +22,9 @@ public class CurrentWeatherRepository {
                                   String lat, String lon) {
         mCurrentRemoteDataSource.getCurrentWeather(listener, lat, lon);
     }
+
+    public void getCurrentWeatherByCityName(CurrentWeatherDataSource.OnFetchDataListener listener,
+                                  String cityName) {
+        mCurrentRemoteDataSource.getCurrentWeatherByCityName(listener, cityName);
+    }
 }

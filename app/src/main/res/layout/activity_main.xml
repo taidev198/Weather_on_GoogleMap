@@ -4,13 +4,13 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.MainActivity">
+    tools:context=".ui.main.MainActivity">
 
     <fragment
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/map"
-        tools:context=".ui.MainActivity"
+        tools:context=".ui.main.MainActivity"
         android:name="com.google.android.gms.maps.SupportMapFragment"/>
 
     <androidx.appcompat.widget.Toolbar
@@ -27,7 +27,8 @@
         app:layout_constraintTop_toTopOf="parent" >
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            tools:context=".ui.main.MainActivity" >
 
 <!--            <ImageView-->
 <!--                android:id="@+id/image_back_button"-->

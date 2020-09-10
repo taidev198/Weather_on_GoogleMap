@@ -64,7 +64,6 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
             sb.append(line).append(Constants.BREAK_LINE);
         }
         br.close();
-        System.out.println("done");
         connection.disconnect();
         return sb.toString();
     }

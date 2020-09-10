@@ -3,7 +3,7 @@ package com.taimar198.weatherongooglemap.data.source.current;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.utls.StringUtil;
 
-public class CurrentRemoteDataSource implements CurrentWeatherDataSource.RemoteDataSource {
+        public class CurrentRemoteDataSource implements CurrentWeatherDataSource.RemoteDataSource {
     private static CurrentRemoteDataSource sInstance;
 
     private CurrentRemoteDataSource() {
@@ -22,5 +22,12 @@ public class CurrentRemoteDataSource implements CurrentWeatherDataSource.RemoteD
         FetchCurrentWeatherFromUrl fetchCurrentWeatherFromUrl
                 = new FetchCurrentWeatherFromUrl(listener);
         fetchCurrentWeatherFromUrl.execute(StringUtil.formatWeatherAPI(lat, lon));
+    }
+
+    @Override
+    public void getCurrentWeatherByCityName(CurrentWeatherDataSource.OnFetchDataListener listener, String cityName) {
+        FetchCurrentWeatherFromUrl fetchCurrentWeatherFromUrl
+                = new FetchCurrentWeatherFromUrl(listener);
+        fetchCurrentWeatherFromUrl.execute(StringUtil.formatWeatherByCityName(cityName));
     }
 }

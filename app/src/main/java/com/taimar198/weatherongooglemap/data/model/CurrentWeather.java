@@ -6,7 +6,7 @@ import java.util.Date;
 
 public class CurrentWeather {
     private Date mDate;
-    private int mTemp;
+    private Temperature mTemp;
     private String mWeather;
     private Location location;
     // Downloaded separately
@@ -17,7 +17,7 @@ public class CurrentWeather {
         location = new Location();
     }
 
-    public CurrentWeather(Date date, int temp, String weather, Bitmap icon) {
+    public CurrentWeather(Date date, Temperature temp, String weather, Bitmap icon) {
         mDate = date;
         mTemp = temp;
         mWeather = weather;
@@ -40,11 +40,11 @@ public class CurrentWeather {
         mDate = date;
     }
 
-    public int getTemp() {
+    public Temperature getTemp() {
         return mTemp;
     }
 
-    public void setTemp(int temp) {
+    public void setTemp(Temperature temp) {
         mTemp = temp;
     }
 

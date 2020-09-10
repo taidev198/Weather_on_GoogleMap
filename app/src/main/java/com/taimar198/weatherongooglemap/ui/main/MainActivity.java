@@ -1,22 +1,20 @@
-package com.taimar198.weatherongooglemap.ui;
+package com.taimar198.weatherongooglemap.ui.main;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.location.Location;
 import android.os.Bundle;
-import android.telephony.SmsManager;
-import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
+import android.widget.SearchView;
 import android.widget.Spinner;
 import android.widget.Toast;
 
@@ -29,40 +27,31 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.TileOverlay;
-import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.android.gms.maps.model.TileProvider;
-import com.google.android.gms.maps.model.UrlTileProvider;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Locale;
-
+import com.taimar198.weatherongooglemap.ui.search.SearchContract;
+import com.taimar198.weatherongooglemap.ui.search.SearchPresenter;
+/**https://guides.codepath.com/android/Google-Maps-API-v2-Usage*/
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         CurrentWeatherDataSource.OnFetchDataListener,
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMyLocationButtonClickListener,
-        GoogleMap.OnMyLocationClickListener {
+        GoogleMap.OnMyLocationClickListener,
+        SearchContract.View,
+        SearchView.OnQueryTextListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private boolean permissionDenied = false;
     private GoogleMap mMap;
     private CurrentWeatherRepository mCurrentWeatherRepository;
-    private static String OWM_TILE_URL = "https://tile.openweathermap.org/map/%s/%d/%d/%d.png";
-    private Spinner spinner;
-    private String tileType = "clouds";
-    private TileOverlay tileOver;
-    private ImageView mIconWeather;
+    private SearchPresenter mSearchPresenter;
+    private SearchView mSearchView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -73,11 +62,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        addAction();
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
-        mIconWeather = findViewById(R.id.icon_wether);
+        mSearchView = findViewById(R.id.search_view);
         mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
+        mSearchPresenter = new SearchPresenter(this, mCurrentWeatherRepository);
+        mSearchPresenter.start();
         mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
 
     }
@@ -116,7 +108,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // position on right bottom
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);rlp.setMargins(0,0,30,30);
-        Toast.makeText(getApplicationContext(), "done", Toast.LENGTH_LONG).show();
     }
 
     private void setOnClick() {
@@ -164,16 +155,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // Add a marker in Sydney and move the camera
         LatLng sydney = new LatLng(-34, 151);
         LatLng hanoi = new LatLng(21, 105);
-               // .setIcon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher_background));
         mMap.addMarker(new MarkerOptions()
-                .position(hanoi)
-                .title("Ha Noi")
-                .snippet("Description")
-                .icon(BitmapDescriptorFactory
-                        .fromBitmap(createDrawableFromView(
-                                this,
-                                markerView))));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(hanoi));
+        .position(hanoi));
+//        mMap.addMarker(new MarkerOptions()
+//                .position(hanoi)
+//                .title("Ha Noi")
+//                .snippet("Description")
+//                .icon(BitmapDescriptorFactory
+//                        .fromBitmap(createDrawableFromView(
+//                                this,
+//                                markerView))));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLng(hanoi));
     }
 
     private Bitmap createDrawableFromView(Context context, View view) {
@@ -187,20 +180,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Canvas canvas = new Canvas(bitmap);
         view.draw(canvas);
-
         return bitmap;
     }
 
     @Override
     public void onFetchDataSuccess(CurrentWeather data) {
-        if (mIconWeather == null) {
-            mIconWeather = findViewById(R.id.icon_wether);
-            System.out.println(mIconWeather == null);
-        }else {
-
-            mIconWeather.setImageResource(R.drawable.custom_marker);
-        }
-
+        mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(),data));
     }
 
     @Override
@@ -216,5 +201,63 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMyLocationClick(@NonNull Location location) {
         System.out.println("location" + location.getLatitude() +"---" + location.getLongitude());
+    }
+
+    @Override
+    public boolean onQueryTextSubmit(String s) {
+        mSearchPresenter.searchCityNameResult(s);
+        System.out.println(s);
+        return false;
+    }
+
+    @Override
+    public boolean onQueryTextChange(String s) {
+        return false;
+    }
+
+    @Override
+    public void showIntroSearch() {
+
+    }
+
+    @Override
+    public void hideIntroSearch() {
+
+    }
+
+    @Override
+    public void showProgressBar() {
+
+    }
+
+    @Override
+    public void hideProgressBar() {
+
+    }
+
+    @Override
+    public void showSearchResult(CurrentWeather currentWeather) {
+
+    }
+
+    @Override
+    public void showError(String errMsg) {
+
+    }
+
+    @Override
+    public void showSuccess(String msg) {
+
+    }
+
+    @Override
+    public void setPresenter(SearchContract.Presenter presenter) {
+
+    }
+//add action to searchview
+    private void addAction() {
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+//        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
+//        mSearchView.setOnQueryTextListener(this);
     }
 }

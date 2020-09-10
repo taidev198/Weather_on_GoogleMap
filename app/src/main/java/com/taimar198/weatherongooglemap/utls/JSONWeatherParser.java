@@ -43,6 +43,7 @@ public class JSONWeatherParser {
 
         JSONObject mainObj = new JSONObject(data);
         JSONObject coordinatesObj = getObject(COORDINATES, mainObj);
+        JSONObject tempObj = getObject(CURRENT_TEMPERATURE, mainObj);
         JSONObject extrasObj = getObject(EXTRAS, mainObj);
         JSONObject weatherObj = mainObj.getJSONArray(WEATHER).getJSONObject(0);
         JSONObject currentOjb = getObject(CURRENT, mainObj);
@@ -67,9 +68,9 @@ public class JSONWeatherParser {
 //        weather.getCurrentCondition().setPressure(getInt(CURRENT_PRESSURE, currentOjb));
 //
 //        // Temperature data
-//        weather.getTemperature().setMaxTemperature(getFloat(CURRENT_MAX_TEMPERATURE, currentOjb));
-//        weather.getTemperature().setMinTemperature(getFloat(CURRENT_MIN_TEMPERATURE, currentOjb));
-//        weather.getTemperature().setTemperature(getFloat(CURRENT_TEMPERATURE, currentOjb));
+        weather.getTemp().setMaxTemperature(getFloat(CURRENT_MAX_TEMPERATURE, tempObj));
+        weather.getTemp().setMinTemperature(getFloat(CURRENT_MIN_TEMPERATURE, tempObj));
+        weather.getTemp().setTemperature(getFloat(CURRENT_TEMPERATURE, tempObj));
 //
 //        // Wind data
 //        weather.getWind().setSpeed(getFloat(WIND_SPEED, windObj));

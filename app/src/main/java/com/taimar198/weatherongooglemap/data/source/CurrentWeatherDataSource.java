@@ -12,5 +12,8 @@ public interface CurrentWeatherDataSource {
 
     interface RemoteDataSource {
         void getCurrentWeather(OnFetchDataListener listener, String lat, String lon);
+
+        void getCurrentWeatherByCityName(OnFetchDataListener listener, String cityName);
     }
+
 }

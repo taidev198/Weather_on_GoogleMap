@@ -29,7 +29,7 @@ public class Constants {
 
     public static final String DEGREE = "°";
     public static final String SLASH = "/";
-    public static final String ques = "?";
+    public static final String QUERY = "q";
 
     public static final int INDEX_0 = 0;
     public static final int INDEX_1 = 1;

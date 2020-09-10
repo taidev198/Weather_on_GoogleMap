@@ -27,6 +27,19 @@ public class StringUtil {
         return urlBuilder.build().toString();
     }
 
+    public static String formatWeatherByCityName(String cityName) {
+        Uri.Builder urlBuilder = new Uri.Builder();
+        urlBuilder.scheme(Constants.SCHEME)
+                .encodedAuthority(Constants.BASE_URL)
+                .appendPath(Constants.VERSION)
+                .appendPath(Constants.WEATHER)
+                .appendQueryParameter(Constants.QUERY, cityName)
+                .appendQueryParameter(Constants.APP_ID, "e370756ec8af6d31ce5f25668bf0bee8");
+//        return String.format("%s%s/%s,%s", Constants.BASE_URL, "e370756ec8af6d31ce5f25668bf0bee8", lat, lon);
+        System.out.println(urlBuilder.build().toString());
+        return urlBuilder.build().toString();
+    }
+
 //    public static String formatAirQualityAPI(String lat, String lon) {
 //        return String.format("%s%s;%s%s%s",
 //                Constant.BASE_URL_AQI, lat, lon, Constant.GET_TOKEN_AQI, BuildConfig.AQI_TOKEN);
