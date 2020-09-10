@@ -70,4 +70,5 @@
     <string name="icon_temp_min">Icon Temp Min</string>
     <string name="icon_redirect_load_all">Load all</string>
     <string name="icon_air_quality">Icon Air Quality</string>
+    <string name="text_search_hint">type city name /reg</string>
 </resources>
