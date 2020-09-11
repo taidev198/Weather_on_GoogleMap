@@ -9,17 +9,10 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.location.Location;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
-import android.widget.SearchView;
-import android.widget.Spinner;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,16 +20,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.Status;
-import com.google.android.gms.location.places.ui.PlaceAutocompleteFragment;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
-import com.google.android.gms.maps.model.CircleOptions;
-import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -48,7 +37,6 @@ import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
-import com.google.android.libraries.places.api.model.TypeFilter;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
@@ -59,21 +47,13 @@ import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.ui.map.MapContract;
-import com.taimar198.weatherongooglemap.ui.search.SearchContract;
-import com.taimar198.weatherongooglemap.ui.search.SearchPresenter;
-
-import org.jetbrains.annotations.NotNull;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -83,20 +63,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        SearchView.OnQueryTextListener, MapContract.View {
+        MapContract.View {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
-    private static final String LOG_TAG = "api";
     private GoogleMap mMap;
     private CurrentWeatherRepository mCurrentWeatherRepository;
-    private SearchPresenter mSearchPresenter;
-    private SearchView mSearchView;
-    private Circle circle;
-    private static final String PLACES_API_BASE = "https://maps.googleapis.com/maps/api/place";
-    private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
-    private static final String OUT_JSON = "/json";
-
-    private static final String API_KEY = "AIzaSyAqdRuDwUbXJTQ1WwdIIR6_F3k3etpb5Og";
     TileProvider tileProvider = new UrlTileProvider(256, 256) {
         @Override
         public URL getTileUrl(int x, int y, int zoom) {
@@ -104,10 +75,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             /* Define the URL pattern for the tile images */
             String s = String.format("https://openweathermap.org/img/wn/10d@2x.png",
                     zoom, x, y);
-
-//            if (!checkTileExists(x, y, zoom)) {
-//                return null;
-//            }
 
             try {
                 return new URL(s);
@@ -147,7 +114,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
-        addAction();
         String apiKey = "AIzaSyBTcsNmbllmjlhi_7LQUEyXPPLE3CbZ2vw";
         Places.initialize(getApplicationContext(), apiKey);
 
@@ -182,12 +148,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        mSearchView = findViewById(R.id.search_view);
         mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
 //        mSearchPresenter = new SearchPresenter(this, mCurrentWeatherRepository);
 //        mSearchPresenter.start();
         mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
-       // new GetAutocompleteAsync().execute();
     }
 
     private void checkPermission() {
@@ -224,14 +188,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         // position on right bottom
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);rlp.setMargins(0,0,30,30);
-        circle = mMap.addCircle(new CircleOptions()
-                .center(new LatLng(21.027763, 105.834160))
-                .radius(1000)
-                .strokeWidth(10)
-                .strokeColor(Color.GREEN)
-                .fillColor(Color.argb(128, 255, 0, 0))
-                .clickable(true));
-
         mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
             @Override
             public void onCircleClick(Circle circle) {
@@ -241,12 +197,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 circle.setStrokeColor(strokeColor);
             }
         });
-        Polyline line = mMap.addPolyline(new PolylineOptions()
-                .add(new LatLng(-37.81319, 144.96298), new LatLng(-31.95285, 115.85734))
-                .width(25)
-                .color(Color.BLUE)
-                .geodesic(true));
-        LatLng NEWARK = new LatLng(21.027763, 105.834160);
 
 //        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
 //                .image(BitmapDescriptorFactory.fromResource(R.drawable.custom_marker))
@@ -406,43 +356,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public boolean onQueryTextSubmit(String s) {
-        mSearchPresenter.searchCityNameResult(s);
-        System.out.println(s);
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String s) {
-        return false;
-    }
-
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        if (requestCode == AUTOCOMPLETE_REQUEST_CODE) {
-//            if (resultCode == RESULT_OK) {
-//                Place place = Autocomplete.getPlaceFromIntent(data);
-//                Log.i(TAG, "Place: " + place.getName() + ", " + place.getId());
-//            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-//                // TODO: Handle the error.
-//                Status status = Autocomplete.getStatusFromIntent(data);
-//                Log.i(TAG, status.getStatusMessage());
-//            } else if (resultCode == RESULT_CANCELED) {
-//                // The user canceled the operation.
-//            }
-//            return;
-//        }
-//        super.onActivityResult(requestCode, resultCode, data);
-//    }
-
-//add action to searchview
-    private void addAction() {
-        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
-//        mSearchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
-//        mSearchView.setOnQueryTextListener(this);
-    }
-
-    @Override
     public void loadMap() {
 
     }
@@ -460,75 +373,5 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void setPresenter(MapContract.Presenter presenter) {
 
-    }
-
-    class GetAutocompleteAsync extends AsyncTask<String, String, ArrayList<String>> {
-
-        @Override
-        protected ArrayList<String> doInBackground(String... params) {
-
-            ArrayList<String> results = autocomplete("San Francisco");
-            return results;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<String> resultArrayList) {
-            if (resultArrayList != null) {
-                System.out.println(resultArrayList.toString());
-            }
-        }
-
-    }
-
-
-    public static ArrayList autocomplete(String input) {
-        ArrayList resultList = null;
-
-        HttpURLConnection conn = null;
-        StringBuilder jsonResults = new StringBuilder();
-        try {
-            StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
-            sb.append("?key=" + API_KEY);
-
-            sb.append("&input=" + URLEncoder.encode(input, "utf8"));
-
-            URL url = new URL(sb.toString());
-            conn = (HttpURLConnection) url.openConnection();
-            InputStreamReader in = new InputStreamReader(conn.getInputStream());
-            System.out.println(url);
-            int read;
-            char[] buff = new char[1024];
-            while ((read = in.read(buff)) != -1) {
-                jsonResults.append(buff, 0, read);
-            }
-        } catch (MalformedURLException e) {
-            Log.e(LOG_TAG, "Error processing API URL", e);
-            return resultList;
-        } catch (IOException e) {
-            Log.e(LOG_TAG, "Error connecting to Places API", e);
-            return resultList;
-        } finally {
-            if (conn != null) {
-                conn.disconnect();
-            }
-        }
-
-        try {
-
-            JSONObject jsonObj = new JSONObject(jsonResults.toString());
-            JSONArray predsJsonArray = jsonObj.getJSONArray("predictions");
-
-
-            resultList = new ArrayList(predsJsonArray.length());
-            for (int i = 0; i < predsJsonArray.length(); i++) {
-                System.out.println(predsJsonArray.getJSONObject(i).getString("description"));
-                System.out.println("============================================================");
-                resultList.add(predsJsonArray.getJSONObject(i).getString("description"));
-            }
-        } catch (JSONException e) {
-            Log.e(LOG_TAG, "Cannot process JSON results", e);
-        }
-
-        return resultList;
     }
 }
