@@ -42,6 +42,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
+import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
@@ -114,8 +115,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
-        String apiKey = "AIzaSyBTcsNmbllmjlhi_7LQUEyXPPLE3CbZ2vw";
-        Places.initialize(getApplicationContext(), apiKey);
+        Places.initialize(getApplicationContext(), BuildConfig.CONSUMER_GMAP_KEY);
 
         // Create a new Places client instance.
         placesClient = Places.createClient(this);
