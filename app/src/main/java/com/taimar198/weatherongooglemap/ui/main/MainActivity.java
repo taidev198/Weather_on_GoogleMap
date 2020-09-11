@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
 
@@ -21,6 +22,9 @@ import androidx.core.content.ContextCompat;
 
 import com.google.android.gms.common.api.Status;
 
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -35,6 +39,8 @@ import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.maps.model.TileOverlayOptions;
 import com.google.android.gms.maps.model.TileProvider;
 import com.google.android.gms.maps.model.UrlTileProvider;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
@@ -67,8 +73,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         MapContract.View {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
+    private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
     private GoogleMap mMap;
     private CurrentWeatherRepository mCurrentWeatherRepository;
+    TileOverlay tileOverlay ;
+    private PlacesClient placesClient;
+    private final LatLng defaultLocation = new LatLng(-33.8523341, 151.2106085);
+    private boolean locationPermissionGranted = false;
+    private static final int DEFAULT_ZOOM = 15;
+    // The entry point to the Fused Location Provider.
+    private FusedLocationProviderClient fusedLocationProviderClient;
+    // The geographical location where the device is currently located. That is, the last-known
+    // location retrieved by the Fused Location Provider.
+    private Location lastKnownLocation;
+
     TileProvider tileProvider = new UrlTileProvider(256, 256) {
         @Override
         public URL getTileUrl(int x, int y, int zoom) {
@@ -101,10 +119,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             return true;
         }
     };
-
-    TileOverlay tileOverlay ;
-    private PlacesClient placesClient;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -148,9 +162,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
+//        // Construct a GeoDataClient.
+//        mGeoDataClient = Places.getGeoDataClient(this, null);
+//
+//        // Construct a PlaceDetectionClient.
+//        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
+        // Construct a FusedLocationProviderClient.
+        fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
-//        mSearchPresenter = new SearchPresenter(this, mCurrentWeatherRepository);
-//        mSearchPresenter.start();
         mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
     }
 
@@ -229,8 +248,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 }
                 return;
             }
+            case PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    locationPermissionGranted = true;
+                }
+            }
+
     }
+    updateLocationUI();
     }
+
+    private void updateLocationUI() {
+        if (mMap == null) {
+            return;
+        }
+        try {
+            if (!locationPermissionGranted) {
+                lastKnownLocation = null;
+                getLocationPermission();
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage());
+        }
+    }
+
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -262,20 +305,76 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                        .fromBitmap(createDrawableFromView(
 //                                this,
 //                                markerView))));
-        mMap.animateCamera(CameraUpdateFactory.newLatLng(hanoi));
-        try {
-            ArrayList<WeightedLatLng> result = generateHeatMapData();
-//            new CrimeData().getWeightedPositions();
-            HeatmapTileProvider heatmapTileProvider = new HeatmapTileProvider.Builder()
-                    .weightedData(result) // load our weighted data
-                    .radius(50) // optional, in pixels, can be anything between 20 and 50
-                    .maxIntensity(1000.0) // set the maximum intensity
-                    .build();
-            mMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatmapTileProvider));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
+//        mMap.animateCamera(CameraUpdateFactory.newLatLng(hanoi));
+        // Turn on the My Location layer and the related control on the map.
+        updateLocationUI();
 
+        // Get the current location of the device and set the position of the map.
+        getDeviceLocation();
+//        CameraUpdate zoom = CameraUpdateFactory.zoomTo(0.1f);
+//        mMap.animateCamera(zoom);
+//        try {
+//            ArrayList<WeightedLatLng> result = generateHeatMapData();
+////            new CrimeData().getWeightedPositions();
+//            HeatmapTileProvider heatmapTileProvider = new HeatmapTileProvider.Builder()
+//                    .weightedData(result) // load our weighted data
+//                    .radius(50) // optional, in pixels, can be anything between 20 and 50
+//                    .maxIntensity(1000.0) // set the maximum intensity
+//                    .build();
+//            mMap.addTileOverlay(new TileOverlayOptions().tileProvider(heatmapTileProvider));
+//        } catch (JSONException e) {
+//            e.printStackTrace();
+//        }
+
+    }
+
+    private void getLocationPermission() {
+        /*
+         * Request location permission, so that we can get the location of the
+         * device. The result of the permission request is handled by a callback,
+         * onRequestPermissionsResult.
+         */
+        if (ContextCompat.checkSelfPermission(this.getApplicationContext(),
+                android.Manifest.permission.ACCESS_FINE_LOCATION)
+                == PackageManager.PERMISSION_GRANTED) {
+            locationPermissionGranted = true;
+        } else {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},
+                    PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+        }
+    }
+
+    private void getDeviceLocation() {
+        /*
+         * Get the best and most recent location of the device, which may be null in rare
+         * cases when a location is not available.
+         */
+        try {
+            if (locationPermissionGranted) {
+                Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
+                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Location> task) {
+                        if (task.isSuccessful()) {
+                            // Set the map's camera position to the current location of the device.
+                            lastKnownLocation = task.getResult();
+                            if (lastKnownLocation != null) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(lastKnownLocation.getLatitude(),
+                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                            }
+                        } else {
+
+                            mMap.moveCamera(CameraUpdateFactory
+                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+                        }
+                    }
+                });
+            }
+        } catch (SecurityException e)  {
+            Log.e("Exception: %s", e.getMessage(), e);
+        }
     }
 
     public void updateTileOverlayTransparency() {
