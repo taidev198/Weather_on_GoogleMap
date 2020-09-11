@@ -35,10 +35,9 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
             String data = getStringDataFromUrl(url);
 
             return  JSONWeatherParser.getWeather(data);
-        } catch (IOException e) {
+        } catch (IOException | JSONException e) {
             mException = e;
-        } catch (JSONException e) {
-            mException = e;
+            System.out.println(e);
         }
         return null;
     }
@@ -74,6 +73,7 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
             return;
         }
         if (mException == null) {
+            System.out.println(currentWeather.toString());
             mListener.onFetchDataSuccess(currentWeather);
         } else {
             mListener.onFetchDataFailure(mException);

@@ -21,6 +21,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.PagerAdapter;
+import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.gms.common.api.Status;
 
@@ -91,6 +93,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
 
+    private ViewPager mPager;
+
+    /**
+     * The pager adapter, which provides the pages to the view pager widget.
+     */
+    private PagerAdapter pagerAdapter;
     TileProvider tileProvider = new UrlTileProvider(256, 256) {
         @Override
         public URL getTileUrl(int x, int y, int zoom) {
@@ -149,12 +157,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 Place.Field.LAT_LNG,
                 Place.Field.ADDRESS));
 
+        mPager = findViewById(R.id.weather_pager);
         // Set up a PlaceSelectionListener to handle the response.
         autocompleteFragment.setOnPlaceSelectedListener(new PlaceSelectionListener() {
 
             @Override
             public void onPlaceSelected(@NonNull Place place) {
-                System.out.println(place.getLatLng());
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                        new LatLng(place.getLatLng().latitude,
+                                place.getLatLng().longitude), DEFAULT_ZOOM));
+                mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLatLng().latitude,
+                        place.getLatLng().longitude)).
+                        title(place.getAddress()));
             }
 
             @Override
@@ -166,11 +180,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
 
-//        // Construct a GeoDataClient.
-//        mGeoDataClient = Places.getGeoDataClient(this, null);
-//
-//        // Construct a PlaceDetectionClient.
-//        mPlaceDetectionClient = Places.getPlaceDetectionClient(this, null);
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
@@ -348,7 +357,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
         }
     }
-
+//https://stackoverflow.com/questions/9409195/how-to-get-complete-address-from-latitude-and-longitude
+    //https://developers.google.com/maps/documentation/android-sdk/current-place-tutorial
     private void getDeviceLocation() {
         /*
          * Get the best and most recent location of the device, which may be null in rare
@@ -456,7 +466,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onFetchDataSuccess(CurrentWeather data) {
-        mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(),data));
+        pagerAdapter = new CardAdapter(getSupportFragmentManager(),data,2);
+        mPager.setAdapter(pagerAdapter);
+       // mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(),data));
     }
 
     @Override

@@ -40,10 +40,10 @@ public class JSONWeatherParser {
             CLOUDINESS = "all";
 
     public static CurrentWeather getWeather(String data) throws JSONException {
-
         JSONObject mainObj = new JSONObject(data);
         JSONObject coordinatesObj = getObject(COORDINATES, mainObj);
-        JSONObject tempObj = getObject(CURRENT_TEMPERATURE, mainObj);
+//        JSONObject mainWeatherObj = getObject(WEATHER_TITLE, mainObj);
+        JSONObject tempObj = getObject(WEATHER_TITLE, mainObj);
         JSONObject extrasObj = getObject(EXTRAS, mainObj);
         JSONObject weatherObj = mainObj.getJSONArray(WEATHER).getJSONObject(0);
         JSONObject currentOjb = getObject(CURRENT, mainObj);
@@ -51,13 +51,11 @@ public class JSONWeatherParser {
         JSONObject windObj = getObject(WIND, mainObj);
 
         CurrentWeather weather = new CurrentWeather();
-
         // Location data
         weather.getLocation().setCity(getString(CITY, mainObj));
         weather.getLocation().setLatitude(getFloat(LATITUDE, coordinatesObj));
         weather.getLocation().setLongitude(getFloat(LONGITUDE, coordinatesObj));
         weather.getLocation().setCountry(getString(EXTRAS_COUNTRY, extrasObj));
-
         weather.setWeather(getString(WEATHER_DESCRIPTION, weatherObj));
         weather.setIcon(getBitmapFromURL(getString(WEATHER_ICON_STRING, weatherObj)));
 //        // Current condition
@@ -78,7 +76,7 @@ public class JSONWeatherParser {
 //
 //        // Clouds data
 //        weather.getClouds().setPrecipitation(getInt(CLOUDINESS, cloudsObj));
-        System.out.println("weather"+ weather.getIcon());
+        System.out.println("done6");
         return weather;
     }
 

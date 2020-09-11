@@ -15,6 +15,8 @@ public class CurrentWeather {
 
     public CurrentWeather() {
         location = new Location();
+        mTemp = new Temperature();
+        mDate = new Date();
     }
 
     public CurrentWeather(Date date, Temperature temp, String weather, Bitmap icon) {
