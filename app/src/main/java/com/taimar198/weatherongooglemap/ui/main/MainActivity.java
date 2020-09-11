@@ -8,6 +8,8 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -63,6 +65,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 /**https://guides.codepath.com/android/Google-Maps-API-v2-Usage*/
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -357,8 +361,24 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     @Override
                     public void onComplete(@NonNull Task<Location> task) {
                         if (task.isSuccessful()) {
-                            // Set the map's camera position to the current location of the device.
                             lastKnownLocation = task.getResult();
+                            //get address from lat and long
+                            Geocoder geocoder;
+                            List<Address> addresses;
+                            geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+
+                            try {
+                                addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(),
+                                        lastKnownLocation.getLongitude(),
+                                        1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                                String city = addresses.get(0).getLocality();
+                                System.out.println(address + "---" + city);
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+                            // Set the map's camera position to the current location of the device.
+
                             if (lastKnownLocation != null) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
@@ -446,6 +466,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onMyLocationButtonClick() {
+        System.out.println("hello");
         return false;
     }
 
