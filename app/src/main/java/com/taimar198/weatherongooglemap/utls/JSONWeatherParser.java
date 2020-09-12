@@ -4,14 +4,23 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 
+import com.google.gson.JsonParser;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
+import com.taimar198.weatherongooglemap.data.model.DailyWeather;
+import com.taimar198.weatherongooglemap.data.model.HourlyWeather;
+import com.taimar198.weatherongooglemap.data.model.Location;
+import com.taimar198.weatherongooglemap.data.model.Weather;
+import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.taimar198.weatherongooglemap.constants.Constants.IMG_URL;
 
@@ -22,64 +31,92 @@ public class JSONWeatherParser {
             LONGITUDE = "lon",
             EXTRAS = "sys",
             WEATHER = "weather",
+            CURRENT = "current",
             WEATHER_TITLE = "main",
             WEATHER_DESCRIPTION = "description",
             EXTRAS_COUNTRY = "country",
             CITY = "name",
             WEATHER_ICON_STRING = "icon",
-            CURRENT = "main",
+            MAIN = "main",
             CURRENT_TEMPERATURE = "temp",
             CURRENT_HUMIDITY = "humidity",
             CURRENT_PRESSURE = "pressure",
-            CURRENT_MAX_TEMPERATURE = "temp_max",
-            CURRENT_MIN_TEMPERATURE = "temp_min",
+            CURRENT_MAX_TEMPERATURE = "max",
+            CURRENT_MIN_TEMPERATURE = "min",
             WIND = "wind",
             WIND_SPEED = "speed",
             WIND_DEGREES = "deg",
             CLOUDS = "clouds",
-            CLOUDINESS = "all";
+            CLOUDINESS = "all",
+            HOURLY = "hourly",
+            DAILY = "daily",
+            DAY = "day",
+            EVE = "eve",
+            MOR = "mor",
+            NIGHT = "night";
 
-    public static CurrentWeather getWeather(String data) throws JSONException {
+    public static WeatherForecast getWeather(String data) throws JSONException {
+        JsonParser jsonParser = new JsonParser();
         JSONObject mainObj = new JSONObject(data);
-        JSONObject coordinatesObj = getObject(COORDINATES, mainObj);
-//        JSONObject mainWeatherObj = getObject(WEATHER_TITLE, mainObj);
-        JSONObject tempObj = getObject(WEATHER_TITLE, mainObj);
-        JSONObject extrasObj = getObject(EXTRAS, mainObj);
-        JSONObject weatherObj = mainObj.getJSONArray(WEATHER).getJSONObject(0);
-        JSONObject currentOjb = getObject(CURRENT, mainObj);
-        JSONObject cloudsObj = getObject(CLOUDS, mainObj);
-        JSONObject windObj = getObject(WIND, mainObj);
-
-        CurrentWeather weather = new CurrentWeather();
-        // Location data
-        weather.getLocation().setCity(getString(CITY, mainObj));
-        weather.getLocation().setLatitude(getFloat(LATITUDE, coordinatesObj));
-        weather.getLocation().setLongitude(getFloat(LONGITUDE, coordinatesObj));
-        weather.getLocation().setCountry(getString(EXTRAS_COUNTRY, extrasObj));
-        weather.setWeather(getString(WEATHER_DESCRIPTION, weatherObj));
-        weather.setIcon(getBitmapFromURL(getString(WEATHER_ICON_STRING, weatherObj)));
-//        // Current condition
-//        weather.getCurrentCondition().setDescription(getString(WEATHER_DESCRIPTION, weatherObj));
-//        weather.getCurrentCondition().setCondition(getString(WEATHER_TITLE, weatherObj));
-//        weather.getCurrentCondition().setIcon(getString(WEATHER_ICON_STRING, weatherObj));
-//        weather.getCurrentCondition().setHumidity(getInt(CURRENT_HUMIDITY, currentOjb));
-//        weather.getCurrentCondition().setPressure(getInt(CURRENT_PRESSURE, currentOjb));
-//
-//        // Temperature data
-        weather.getTemp().setMaxTemperature(getFloat(CURRENT_MAX_TEMPERATURE, tempObj));
-        weather.getTemp().setMinTemperature(getFloat(CURRENT_MIN_TEMPERATURE, tempObj));
-        weather.getTemp().setTemperature(getFloat(CURRENT_TEMPERATURE, tempObj));
-//
-//        // Wind data
-//        weather.getWind().setSpeed(getFloat(WIND_SPEED, windObj));
-//        weather.getWind().setDegrees(getFloat(WIND_DEGREES, windObj));
-//
-//        // Clouds data
-//        weather.getClouds().setPrecipitation(getInt(CLOUDINESS, cloudsObj));
-        System.out.println("done6");
-        return weather;
+        Location location = new Location();
+        location.setLatitude(getFloat(LATITUDE, mainObj));
+        location.setLongitude(getFloat(LONGITUDE, mainObj));
+        HourlyWeather hourlyWeather = new HourlyWeather();
+        hourlyWeather.setListWeather(getHourlyWeather(mainObj, location));
+        Weather currentWeather = getCurrentWeather(mainObj.getJSONObject(CURRENT), location, false);
+        DailyWeather dailyWeather = new DailyWeather();
+        dailyWeather.setWeatherList(getDailyWeather(mainObj, location));
+        return new WeatherForecast(currentWeather, hourlyWeather, dailyWeather);
     }
 
+
+    private static List<Weather> getHourlyWeather(JSONObject mainObj, Location location) throws JSONException {
+        JSONArray hourlyArr = mainObj.getJSONArray(HOURLY);
+        //HOURLY
+        HourlyWeather hourlyWeather = new HourlyWeather();
+        List<Weather> weathers = new ArrayList<>();
+        for (int i = 0; i < hourlyArr.length(); i++) {
+            JSONObject jsonObject = hourlyArr.getJSONObject(i);
+            weathers.add(getCurrentWeather(jsonObject, location, false));
+        }
+        hourlyWeather.setListWeather(weathers);
+        return weathers;
+
+    }
+
+    private static List<Weather> getDailyWeather(JSONObject mainObj, Location location) throws JSONException {
+        JSONArray hourlyArr = mainObj.getJSONArray(DAILY);
+        DailyWeather dailyWeather = new DailyWeather();
+        List<Weather> weathers = new ArrayList<>();
+        for (int i = 0; i < hourlyArr.length(); i++) {
+            JSONObject jsonObject = hourlyArr.getJSONObject(i);
+            weathers.add(getCurrentWeather(jsonObject, location, true));
+        }
+        dailyWeather.setWeatherList(weathers);
+        return weathers;
+
+    }
+
+    private static Weather getCurrentWeather(JSONObject mainObj, Location location, boolean isTempArr) throws JSONException {
+        JSONObject weatherObj = mainObj.getJSONArray(WEATHER).getJSONObject(0);
+        Weather weather = new Weather();
+        // CURRENT
+        weather.setWeather(getString(WEATHER_DESCRIPTION, weatherObj));
+        weather.setIcon(getBitmapFromURL(getString(WEATHER_ICON_STRING, weatherObj)));
+        weather.getLocation().setLatitude(location.getLatitude());
+        weather.getLocation().setLongitude(location.getLongitude());
+        if (!isTempArr){
+            weather.getTemp().setTemperature(getFloat(CURRENT_TEMPERATURE, mainObj));
+        }
+
+        else {
+            JSONObject tempObj = getObject(CURRENT_TEMPERATURE, mainObj);
+            weather.getTemp().setMaxTemperature(getFloat(CURRENT_MAX_TEMPERATURE, tempObj));
+            weather.getTemp().setMinTemperature(getFloat(CURRENT_MIN_TEMPERATURE, tempObj));
+
+        }
+        return weather;
+    }
 
     private static JSONObject getObject(String tagName, JSONObject jObj)  throws JSONException {
         return jObj.getJSONObject(tagName);

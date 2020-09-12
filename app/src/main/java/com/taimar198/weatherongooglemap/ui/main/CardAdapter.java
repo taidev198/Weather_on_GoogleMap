@@ -6,12 +6,13 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
+import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 
 public class CardAdapter  extends FragmentPagerAdapter {
 
-    private CurrentWeather mCurrentWeather;
+    private WeatherForecast mCurrentWeather;
 
-    public CardAdapter(@NonNull FragmentManager fm, CurrentWeather currentWeather,  int behavior) {
+    public CardAdapter(@NonNull FragmentManager fm, WeatherForecast currentWeather, int behavior) {
         super(fm, behavior);
         mCurrentWeather = currentWeather;
     }
@@ -21,13 +22,13 @@ public class CardAdapter  extends FragmentPagerAdapter {
     public Fragment getItem(int position) {
 
         switch (position) {
-            case 1:mCurrentWeather.getLocation().setCity(String.valueOf(1));
+            case 1:mCurrentWeather.getCurrentWeather().getLocation().setCity(String.valueOf(1));
                 return  ScreenSlidePageFragment.newInstance(mCurrentWeather);
 
-            case 2: mCurrentWeather.getLocation().setCity(String.valueOf(2));
+            case 2: mCurrentWeather.getCurrentWeather().getLocation().setCity(String.valueOf(2));
                 return  ScreenSlidePageFragment.newInstance(mCurrentWeather);
         }
-        mCurrentWeather.getLocation().setCity(String.valueOf(3));
+        mCurrentWeather.getCurrentWeather().getLocation().setCity(String.valueOf(3));
         return  ScreenSlidePageFragment.newInstance(mCurrentWeather);
     }
 
@@ -36,7 +37,7 @@ public class CardAdapter  extends FragmentPagerAdapter {
         return 3;
     }
 
-    public void setData(CurrentWeather currentWeather) {
+    public void setData(WeatherForecast currentWeather) {
         mCurrentWeather = currentWeather;
     }
 }

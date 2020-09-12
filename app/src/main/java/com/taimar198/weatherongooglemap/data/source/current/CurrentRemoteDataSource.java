@@ -17,11 +17,11 @@ import com.taimar198.weatherongooglemap.utls.StringUtil;
     }
 
     @Override
-    public void getCurrentWeather(CurrentWeatherDataSource.OnFetchDataListener listener,
-                                  String lat, String lon) {
+    public void getWeatherForeCast(CurrentWeatherDataSource.OnFetchDataListener listener,
+                                   String lat, String lon) {
         FetchCurrentWeatherFromUrl fetchCurrentWeatherFromUrl
                 = new FetchCurrentWeatherFromUrl(listener);
-        fetchCurrentWeatherFromUrl.execute(StringUtil.formatWeatherAPI(lat, lon));
+        fetchCurrentWeatherFromUrl.execute(StringUtil.getWeatherForecast(lat, lon));
     }
 
     @Override

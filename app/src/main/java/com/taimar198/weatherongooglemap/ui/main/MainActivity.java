@@ -55,6 +55,7 @@ import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
+import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.ui.map.MapContract;
@@ -465,7 +466,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onFetchDataSuccess(CurrentWeather data) {
+    public void onFetchDataSuccess(WeatherForecast data) {
         pagerAdapter = new CardAdapter(getSupportFragmentManager(),data,2);
         mPager.setAdapter(pagerAdapter);
        // mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(),data));

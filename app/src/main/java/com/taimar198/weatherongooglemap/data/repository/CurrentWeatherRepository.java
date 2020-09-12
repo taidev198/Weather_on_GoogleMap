@@ -20,7 +20,7 @@ public class CurrentWeatherRepository {
 
     public void getCurrentWeather(CurrentWeatherDataSource.OnFetchDataListener listener,
                                   String lat, String lon) {
-        mCurrentRemoteDataSource.getCurrentWeather(listener, lat, lon);
+        mCurrentRemoteDataSource.getWeatherForeCast(listener, lat, lon);
     }
 
     public void getCurrentWeatherByCityName(CurrentWeatherDataSource.OnFetchDataListener listener,

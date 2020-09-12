@@ -5,6 +5,23 @@ public class Temperature {
     private float minTemperature;
     private float maxTemperature;
 
+    public Temperature() {
+
+    }
+
+    public Temperature(float temp) {
+        temperature = temp;
+    }
+
+    public Temperature(float temp,
+                       float minTemp,
+                       float maxTemp) {
+
+        temperature = temp;
+        minTemperature = minTemp;
+        maxTemperature = maxTemp;
+    }
+
     public float getTemperature() {
         return temperature;
     }

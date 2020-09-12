@@ -22,7 +22,6 @@ public class StringUtil {
                 .appendQueryParameter(Constants.LAT, lat)
                 .appendQueryParameter(Constants.LON, lon)
                 .appendQueryParameter(Constants.APP_ID, "e370756ec8af6d31ce5f25668bf0bee8");
-//        return String.format("%s%s/%s,%s", Constants.BASE_URL, "e370756ec8af6d31ce5f25668bf0bee8", lat, lon);
         System.out.println(urlBuilder.build().toString());
         return urlBuilder.build().toString();
     }
@@ -35,15 +34,26 @@ public class StringUtil {
                 .appendPath(Constants.WEATHER)
                 .appendQueryParameter(Constants.QUERY, cityName)
                 .appendQueryParameter(Constants.APP_ID, "e370756ec8af6d31ce5f25668bf0bee8");
-//        return String.format("%s%s/%s,%s", Constants.BASE_URL, "e370756ec8af6d31ce5f25668bf0bee8", lat, lon);
         System.out.println(urlBuilder.build().toString());
         return urlBuilder.build().toString();
     }
 
-//    public static String formatAirQualityAPI(String lat, String lon) {
-//        return String.format("%s%s;%s%s%s",
-//                Constant.BASE_URL_AQI, lat, lon, Constant.GET_TOKEN_AQI, BuildConfig.AQI_TOKEN);
-//    }
+    public static String getWeatherForecast(String lat, String lon) {
+        Uri.Builder urlBuilder = new Uri.Builder();
+        urlBuilder.scheme(Constants.SCHEME)
+                .encodedAuthority(Constants.BASE_URL)
+                .appendPath(Constants.VERSION)
+                .appendPath(Constants.ONECALL)
+                .appendQueryParameter(Constants.LAT, lat)
+                .appendQueryParameter(Constants.LON, lon)
+                .appendQueryParameter(Constants.EXCLUDE,
+                        Constants.DAILY+ Constants.COMMA + Constants.HOURLY)
+                .appendQueryParameter(Constants.LANG, Constants.VI)
+                .appendQueryParameter(Constants.UNITS, Constants.METRIC)
+                .appendQueryParameter(Constants.APP_ID, "e370756ec8af6d31ce5f25668bf0bee8");
+        System.out.println(urlBuilder.build().toString());
+        return urlBuilder.build().toString();
+    }
 
     public static int getCelsiusFromFahrenheit(int degreeF) {
         int degreeC = Math.round((degreeF - 32) / 1.8f);

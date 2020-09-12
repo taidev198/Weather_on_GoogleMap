@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.constants.CurrentWeatherEntity;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
+import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.utls.JSONWeatherParser;
 
@@ -19,7 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Date;
 
-public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentWeather> {
+public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, WeatherForecast> {
 
     private CurrentWeatherDataSource.OnFetchDataListener mListener;
     private Exception mException;
@@ -29,7 +30,7 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
     }
 
     @Override
-    protected CurrentWeather doInBackground(String... strings) {
+    protected WeatherForecast doInBackground(String... strings) {
         String url = strings[0];
         try {
             String data = getStringDataFromUrl(url);
@@ -68,14 +69,15 @@ public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, CurrentW
     }
 
     @Override
-    protected void onPostExecute(CurrentWeather currentWeather) {
+    protected void onPostExecute(WeatherForecast weatherForecast) {
         if (mListener == null) {
             return;
         }
         if (mException == null) {
-            System.out.println(currentWeather.toString());
-            mListener.onFetchDataSuccess(currentWeather);
+            System.out.println(weatherForecast.toString());
+            mListener.onFetchDataSuccess(weatherForecast);
         } else {
+            System.out.println(mException.getLocalizedMessage());
             mListener.onFetchDataFailure(mException);
         }
     }
