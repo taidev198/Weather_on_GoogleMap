@@ -72,4 +72,6 @@
     <string name="icon_air_quality">Icon Air Quality</string>
     <string name="text_search_hint">type city name /reg</string>
     <string name="address">ADDRESS</string>
+    <string name="appwidget_text">EXAMPLE</string>
+    <string name="add_widget">Add widget</string>
 </resources>
