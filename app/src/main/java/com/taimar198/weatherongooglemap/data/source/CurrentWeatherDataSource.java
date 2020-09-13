@@ -4,8 +4,8 @@ import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 
 public interface CurrentWeatherDataSource {
 
-    interface OnFetchDataListener {
-        void onFetchDataSuccess(WeatherForecast data);
+    interface OnFetchDataListener<T> {
+        void onFetchDataSuccess(T data);
 
         void onFetchDataFailure(Exception e);
     }

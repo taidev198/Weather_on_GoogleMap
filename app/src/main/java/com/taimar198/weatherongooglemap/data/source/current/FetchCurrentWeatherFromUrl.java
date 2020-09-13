@@ -3,13 +3,11 @@ package com.taimar198.weatherongooglemap.data.source.current;
 import android.os.AsyncTask;
 
 import com.taimar198.weatherongooglemap.constants.Constants;
-import com.taimar198.weatherongooglemap.constants.CurrentWeatherEntity;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.utls.JSONWeatherParser;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.Date;
 
 public class FetchCurrentWeatherFromUrl extends AsyncTask<String, Void, WeatherForecast> {
 

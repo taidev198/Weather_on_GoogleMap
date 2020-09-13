@@ -10,8 +10,10 @@ import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 
 import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
+import com.taimar198.weatherongooglemap.utls.JSONWeatherParser;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -20,7 +22,7 @@ import java.util.Locale;
 
 public class ScreenSlidePageFragment extends Fragment {
 
-    private WeatherForecast mCurrentWeather;
+    private WeatherForecastResponse mCurrentWeather;
     private ImageView mIconWeather;
     private ImageView mIconWeather1;
     private ImageView mIconWeather2;
@@ -29,10 +31,10 @@ public class ScreenSlidePageFragment extends Fragment {
     private TextView mAddressText;
     private TextView mTempText;
     private TextView mDateText;
-    public ScreenSlidePageFragment(WeatherForecast currentWeather) {
+    public ScreenSlidePageFragment(WeatherForecastResponse currentWeather) {
         mCurrentWeather = currentWeather;
     }
-    public static ScreenSlidePageFragment  newInstance(WeatherForecast currentWeather) {
+    public static ScreenSlidePageFragment  newInstance(WeatherForecastResponse currentWeather) {
         return new ScreenSlidePageFragment(currentWeather);
     }
 
@@ -50,12 +52,12 @@ public class ScreenSlidePageFragment extends Fragment {
         mDateText = rootView.findViewById(R.id.date_weather);
         mDateText.setText(formatDate());
 
-        mIconWeather.setImageBitmap(mCurrentWeather.getCurrentWeather().getIcon());
-        mIconWeather1.setImageBitmap(mCurrentWeather.getCurrentWeather().getIcon());
-        mIconWeather2.setImageBitmap(mCurrentWeather.getCurrentWeather().getIcon());
-        mIconWeather3.setImageBitmap(mCurrentWeather.getCurrentWeather().getIcon());
-        mAddressText.setText(mCurrentWeather.getCurrentWeather().getWeather());
-        mTempText.setText(String.valueOf( mCurrentWeather.getCurrentWeather().getTemp().getTemperature()));
+//        mIconWeather.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
+//        mIconWeather1.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
+//        mIconWeather2.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
+//        mIconWeather3.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
+        mAddressText.setText(mCurrentWeather.getCurrentWeather().getWeathers().get(0).getDescription());
+        mTempText.setText(String.valueOf( mCurrentWeather.getCurrentWeather().getTemp()));
 //        mTempText.setText(1);
         return rootView;
     }

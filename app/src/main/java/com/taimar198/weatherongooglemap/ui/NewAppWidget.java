@@ -13,7 +13,7 @@ import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 /**
  * Implementation of App Widget functionality.
  */
-public class NewAppWidget extends AppWidgetProvider implements CurrentWeatherDataSource.OnFetchDataListener {
+public class NewAppWidget extends AppWidgetProvider {
 
     private CurrentWeatherRepository mCurrentWeatherRepository;
     private static WeatherForecast mWeatherForecast;
@@ -32,8 +32,6 @@ public class NewAppWidget extends AppWidgetProvider implements CurrentWeatherDat
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-        mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
-        mCurrentWeatherRepository.getCurrentWeather(this, "21.027763", "105.834160");
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
@@ -49,14 +47,5 @@ public class NewAppWidget extends AppWidgetProvider implements CurrentWeatherDat
         // Enter relevant functionality for when the last widget is disabled
     }
 
-    @Override
-    public void onFetchDataSuccess(WeatherForecast data) {
-        mWeatherForecast = data;
-    }
-
-    @Override
-    public void onFetchDataFailure(Exception e) {
-
-    }
 }
 
