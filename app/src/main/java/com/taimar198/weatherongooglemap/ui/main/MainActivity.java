@@ -14,11 +14,13 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -44,6 +46,8 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.maps.android.data.kml.KmlLayer;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
@@ -57,6 +61,7 @@ import com.taimar198.weatherongooglemap.ui.map.MapContract;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -101,7 +106,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
-    private PagerAdapter pagerAdapter;
+    private FragmentPagerAdapter pagerAdapter;
     TileProvider tileProvider = new UrlTileProvider(256, 256) {
         @Override
         public URL getTileUrl(int x, int y, int zoom) {
@@ -215,10 +220,14 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .get(0)
                                 .getDescription());
                         mWeatherForecastResponse = weatherForecastResponses;
-                        pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
-                        pagerAdapter.notifyDataSetChanged();
+                        if (pagerAdapter != null) {
+                            pagerAdapter.notifyDataSetChanged();
+                            System.out.println("not null");
+                        }else {
+                            pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
+                        }
                         mPager.setAdapter(pagerAdapter);
-                        mPager.getAdapter().notifyDataSetChanged();
+//                        mPager.getAdapter().notifyDataSetChanged();
                     }
 
                     @Override
@@ -368,7 +377,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        mMap.animateCamera(CameraUpdateFactory.newLatLng(hanoi));
         // Turn on the My Location layer and the related control on the map.
         updateLocationUI();
-
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
 //        CameraUpdate zoom = CameraUpdateFactory.zoomTo(0.1f);
@@ -385,6 +393,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        } catch (JSONException e) {
 //            e.printStackTrace();
 //        }
+
+        try {
+            KmlLayer layer = new KmlLayer(mMap, R.raw.diaphanhuyen, getApplicationContext());
+            layer.addLayerToMap();
+//            layer.setOnFeatureClickListener(feature -> Toast.makeText(KmlDemoActivity.this,
+//                    "Feature clicked: " + feature.getId(),
+//                    Toast.LENGTH_SHORT).show());
+        } catch (XmlPullParserException | IOException e) {
+            e.printStackTrace();
+
+        }
 
     }
 

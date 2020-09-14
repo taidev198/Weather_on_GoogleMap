@@ -4,7 +4,6 @@ import android.graphics.Bitmap;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import com.taimar198.weatherongooglemap.data.service.DownloadImage;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 
