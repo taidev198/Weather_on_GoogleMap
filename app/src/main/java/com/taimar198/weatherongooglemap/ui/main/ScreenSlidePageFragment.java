@@ -11,14 +11,9 @@ import androidx.fragment.app.Fragment;
 
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
-import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
-import com.taimar198.weatherongooglemap.utls.JSONWeatherParser;
+import com.taimar198.weatherongooglemap.utls.Methods;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import static com.taimar198.weatherongooglemap.utls.Methods.formatDate;
 
 public class ScreenSlidePageFragment extends Fragment {
 
@@ -50,9 +45,10 @@ public class ScreenSlidePageFragment extends Fragment {
         mTempText = rootView.findViewById(R.id.text_temp);
         mAddressText = rootView.findViewById(R.id.address_weather);
         mDateText = rootView.findViewById(R.id.date_weather);
-        mDateText.setText(formatDate());
+        mDateText.setText(Methods.formatDate());
 
-//        mIconWeather.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
+        mIconWeather.setImageResource(Methods.getDrawable(mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon(),
+                                                            this.getContext()));
 //        mIconWeather1.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
 //        mIconWeather2.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
 //        mIconWeather3.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
@@ -62,9 +58,5 @@ public class ScreenSlidePageFragment extends Fragment {
         return rootView;
     }
 
-    private String formatDate() {
-        Date c = Calendar.getInstance().getTime();
-        SimpleDateFormat df = new SimpleDateFormat("dd-MMM-yyyy", Locale.getDefault());
-        return df.format(c);
-    }
+
 }

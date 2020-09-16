@@ -157,8 +157,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         place.getLatLng().longitude)).
                         title(place.getAddress()));
                 System.out.println(place.getAddress());
-//                fetchingWeatherForecast(Double.toString(place.getLatLng().latitude),
-//                        Double.toString(place.getLatLng().longitude), place.getAddress());
+                fetchingWeatherForecast(Double.toString(place.getLatLng().latitude),
+                        Double.toString(place.getLatLng().longitude), place.getAddress());
             }
 
             @Override
@@ -364,28 +364,28 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            e.printStackTrace();
 //        }
 
-        try {
-            KmlLayer layer = new KmlLayer(mMap, R.raw.diaphanhuyen, getApplicationContext());
-            layer.addLayerToMap();
-          //  accessContainers(layer.getContainers());
-         //   System.out.println(mLatLngList.get(1).latitude);
-            for (KmlContainer container : layer.getContainers()) {
-                if (container.hasProperty("Ten_Tinh")) {
-                    System.out.println(container.getProperty("Ten_Tinh") + "hello");
-                }
-            }
-//
-//            for (KmlPlacemark container : layer.getPlacemarks()) {
-//                    System.out.println(container.getProperty("Ten_Tinh"));
+//        try {
+//            KmlLayer layer = new KmlLayer(mMap, R.raw.diaphanhuyen, getApplicationContext());
+//            layer.addLayerToMap();
+//          //  accessContainers(layer.getContainers());
+//         //   System.out.println(mLatLngList.get(1).latitude);
+//            for (KmlContainer container : layer.getContainers()) {
+//                if (container.hasProperty("Ten_Tinh")) {
+//                    System.out.println(container.getProperty("Ten_Tinh") + "hello");
 //                }
-
-//            layer.setOnFeatureClickListener(feature -> Toast.makeText(KmlDemoActivity.this,
-//                    "Feature clicked: " + feature.getId(),
-//                    Toast.LENGTH_SHORT).show());
-        } catch (XmlPullParserException | IOException e) {
-            e.printStackTrace();
-
-        }
+//            }
+////
+////            for (KmlPlacemark container : layer.getPlacemarks()) {
+////                    System.out.println(container.getProperty("Ten_Tinh"));
+////                }
+//
+////            layer.setOnFeatureClickListener(feature -> Toast.makeText(KmlDemoActivity.this,
+////                    "Feature clicked: " + feature.getId(),
+////                    Toast.LENGTH_SHORT).show());
+//        } catch (XmlPullParserException | IOException e) {
+//            e.printStackTrace();
+//
+//        }
 
     }
 
@@ -468,8 +468,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                             new LatLng(lastKnownLocation.getLatitude(),
                                                     lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-//                                    fetchingWeatherForecast(Double.toString(lastKnownLocation.getLatitude()),
-//                                            Double.toString(lastKnownLocation.getLongitude()), address);
+                                    fetchingWeatherForecast(Double.toString(lastKnownLocation.getLatitude()),
+                                            Double.toString(lastKnownLocation.getLongitude()), address);
                                 }
                             } catch (IOException e) {
                                 e.printStackTrace();

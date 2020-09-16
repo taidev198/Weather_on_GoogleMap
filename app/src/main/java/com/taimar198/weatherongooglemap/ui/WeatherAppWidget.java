@@ -21,6 +21,7 @@ import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 import com.taimar198.weatherongooglemap.ui.main.CardAdapter;
+import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.net.InetAddress;
 
@@ -64,7 +65,6 @@ public class WeatherAppWidget extends AppWidgetProvider{
 
         final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
          final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.weather_app_widget);
-         remoteViews.setTextViewText(R.id.date_weather_text, "hihi");
         final ComponentName watchWidget = new ComponentName(context, WeatherAppWidget.class);
 
         Toast.makeText(context, "Requested", Toast.LENGTH_SHORT).show();
@@ -86,6 +86,12 @@ public class WeatherAppWidget extends AppWidgetProvider{
                         @Override
                         public void onNext(WeatherForecastResponse weatherForecastResponses) {
                             // Display weather data on widget
+                            remoteViews.setTextViewText(R.id.date_weather_text, Methods.formatDate());
+
+                            remoteViews.setImageViewResource(R.id.icon_weather_widget,
+                                    Methods.getDrawable(weatherForecastResponses.getCurrentWeather().getWeathers().get(0).getIcon(),
+                                    context));
+
                             remoteViews.setTextViewText(R.id.address_weather_text, weatherForecastResponses
                                     .getCurrentWeather()
                                     .getWeathers()
