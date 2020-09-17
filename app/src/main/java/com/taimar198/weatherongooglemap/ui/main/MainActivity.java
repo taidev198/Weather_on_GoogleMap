@@ -4,28 +4,25 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.RelativeLayout;
-import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
-
 import com.google.android.gms.common.api.Status;
-
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,9 +33,9 @@ import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.TileOverlay;
-import com.google.android.gms.maps.model.TileProvider;
-import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -49,30 +46,31 @@ import com.google.android.libraries.places.widget.listener.PlaceSelectionListene
 import com.google.maps.android.data.Geometry;
 import com.google.maps.android.data.kml.KmlContainer;
 import com.google.maps.android.data.kml.KmlLayer;
-import com.google.maps.android.data.kml.KmlLineString;
-import com.google.maps.android.data.kml.KmlMultiGeometry;
 import com.google.maps.android.data.kml.KmlPlacemark;
 import com.google.maps.android.data.kml.KmlPolygon;
-import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.google.maps.android.heatmaps.WeightedLatLng;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
+import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
-import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
+import com.taimar198.weatherongooglemap.ui.WeatherAppWidget;
 import com.taimar198.weatherongooglemap.ui.map.MapContract;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.parser.Parser;
+import org.jsoup.select.Elements;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -85,12 +83,17 @@ import io.reactivex.schedulers.Schedulers;
 
 /**https://guides.codepath.com/android/Google-Maps-API-v2-Usage
  * https://stackoverflow.com/questions/15636303/extract-coordinates-from-kml-file-in-java
- * https://stackoverflow.com/questions/42516114/geoxml3-accessing-kml-attribute-datas*/
+ * https://stackoverflow.com/questions/42516114/geoxml3-accessing-kml-attribute-datas
+ * https://stackoverflow.com/questions/46346531/parsing-kml-in-java
+ * https://stackoverflow.com/questions/1140144/read-and-parse-kml-in-java
+ * https://developers.google.com/maps/documentation/geocoding/overview
+ * https://www.google.com/search?q=reading+coordinates+in+kml+file+with+jsoup&oq=reading+coordinates+in+kml+file+with+jsoup&aqs=chrome..69i57.19692j0j4&sourceid=chrome&ie=UTF-8
+ * */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
         GoogleMap.OnMyLocationButtonClickListener,
         GoogleMap.OnMyLocationClickListener,
-        MapContract.View {
+        MapContract.View, WeatherAppWidget.OnDataReceived {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -108,14 +111,15 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
     private WeatherForecastResponse mWeatherForecastResponse;
-
+    private List<PlaceMark> mPlaceMarkList;
     private ViewPager mPager;
 
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
     private FragmentPagerAdapter pagerAdapter;
-    private ArrayList<LatLng> mLatLngList = new ArrayList<>();
+    private ArrayList<LatLng>    mLatLngList = new ArrayList<>();
+    private WeatherAppWidget.OnDataReceived mOnDataReceived;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -127,6 +131,40 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        InputStream in_s = getResources().openRawResource(R.raw.diaphanhuyen);
+        mPlaceMarkList = new ArrayList<>();
+        Document doc = null;
+        try {
+            PlaceMark placeMark = new PlaceMark();
+            doc = Jsoup.parse(in_s, "UTF-8", "");
+            for(Element e : doc.select("Placemark")) {
+                // the contents
+               Elements es =  e.select("SimpleData");
+               placeMark.setProvince(es.get(2).text());
+                placeMark.setDistrict(es.get(3).text());
+                placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
+//                placeMark.setDistrict(es.get(5).text());
+               String [] coors =  e.select("coordinates").text().split(",");
+               List<LatLng> latLngs = new ArrayList<>();
+
+               for (int i = 0; i< coors.length -1; i++) {
+                   String[] temp = coors[i].split(" ");
+                   if (i ==0 ) {
+                       latLngs.add(new LatLng(Double.parseDouble(coors[0]),
+                               Double.parseDouble(coors[coors.length-1])));
+                   }else
+                   latLngs.add(new LatLng(Double.parseDouble(temp[0]),
+                           Double.parseDouble(temp[1])));
+//                   System.out.println(latLngs.get(i).toString());
+               }
+               placeMark.setLatLngs(latLngs);
+               mPlaceMarkList.add(placeMark);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
         mWeatherForecastResponse = new WeatherForecastResponse();
         Places.initialize(getApplicationContext(), BuildConfig.CONSUMER_GMAP_KEY);
 
@@ -364,28 +402,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //            e.printStackTrace();
 //        }
 
-//        try {
-//            KmlLayer layer = new KmlLayer(mMap, R.raw.diaphanhuyen, getApplicationContext());
-//            layer.addLayerToMap();
-//          //  accessContainers(layer.getContainers());
-//         //   System.out.println(mLatLngList.get(1).latitude);
-//            for (KmlContainer container : layer.getContainers()) {
-//                if (container.hasProperty("Ten_Tinh")) {
-//                    System.out.println(container.getProperty("Ten_Tinh") + "hello");
-//                }
-//            }
-////
-////            for (KmlPlacemark container : layer.getPlacemarks()) {
-////                    System.out.println(container.getProperty("Ten_Tinh"));
-////                }
-//
-////            layer.setOnFeatureClickListener(feature -> Toast.makeText(KmlDemoActivity.this,
-////                    "Feature clicked: " + feature.getId(),
-////                    Toast.LENGTH_SHORT).show());
-//        } catch (XmlPullParserException | IOException e) {
-//            e.printStackTrace();
-//
-//        }
+        Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
+                .clickable(true)
+                .add(mPlaceMarkList.get(0).getLatLngs().toArray(new LatLng[0])));
+
+        System.out.println(mPlaceMarkList.get(0).getDistrict());
 
     }
 
@@ -407,9 +428,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         for (KmlPlacemark placemark : placemarks) {
             if (placemark != null) {
               Iterable<String> iterable =   placemark.getPropertyKeys();
-              for (String s : iterable) {
-                  System.out.println(s + "sout");
-              }
+//              for (String s : iterable) {
+//                  System.out.println(s + "sout");
+//              }
+                System.out.println(placemark.toString());
                 Geometry<LatLng> geometry = placemark.getGeometry();
                 if (geometry instanceof KmlPolygon) {
                     KmlPolygon polygon = (KmlPolygon) geometry;
@@ -465,9 +487,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 String city = addresses.get(0).getLocality();
                                 System.out.println(address + "---" + city);
                                 if (lastKnownLocation != null) {
-                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                            new LatLng(lastKnownLocation.getLatitude(),
-                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+//                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+//                                            new LatLng(lastKnownLocation.getLatitude(),
+//                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                                     fetchingWeatherForecast(Double.toString(lastKnownLocation.getLatitude()),
                                             Double.toString(lastKnownLocation.getLongitude()), address);
                                 }
@@ -479,8 +501,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
                         } else {
 
-                            mMap.moveCamera(CameraUpdateFactory
-                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
+//                            mMap.moveCamera(CameraUpdateFactory
+//                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
                         }
                     }
                 });
@@ -575,6 +597,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void setPresenter(MapContract.Presenter presenter) {
+
+    }
+
+    @Override
+    public void receiveData(WeatherForecastResponse weatherForecastResponse) {
 
     }
 }

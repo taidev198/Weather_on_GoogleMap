@@ -34,11 +34,11 @@ import io.reactivex.schedulers.Schedulers;
  * Implementation of App Widget functionality.
  * https://medium.com/coding-blocks/creating-a-widget-for-your-android-app-1ee915e6af3e
  * https://android--examples.blogspot.com/2015/10/android-how-to-create-weather-widget.html
+ * https://www.vogella.com/tutorials/AndroidWidgets/article.html#updates
  */
 public class WeatherAppWidget extends AppWidgetProvider{
 
-    private CurrentWeatherRepository mCurrentWeatherRepository;
-    private static Weather weather;
+    public static String UPDATE_ACTION = "ActionUpdateWeatherWidget";
     private WeatherApi mWeatherApi;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
@@ -176,7 +176,6 @@ public class WeatherAppWidget extends AppWidgetProvider{
     public void onEnabled(Context context) {
         // Enter relevant functionality for when the first widget is created
 
-        mCurrentWeatherRepository = CurrentWeatherRepository.getInstance();
     }
 
     @Override
@@ -203,6 +202,9 @@ public class WeatherAppWidget extends AppWidgetProvider{
             e.printStackTrace();
         }
         return status;
+    }
+    public interface OnDataReceived {
+        void receiveData(WeatherForecastResponse weatherForecastResponse);
     }
 }
 

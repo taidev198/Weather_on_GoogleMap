@@ -52,7 +52,7 @@ public class ScreenSlidePageFragment extends Fragment {
 //        mIconWeather1.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
 //        mIconWeather2.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
 //        mIconWeather3.setImageBitmap((mCurrentWeather.getCurrentWeather().getWeathers().get(0).getIcon()));
-//        mAddressText.setText(mCurrentWeather.getCurrentWeather().getWeathers().get(0).getDescription());
+        mAddressText.setText(mCurrentWeather.getCurrentWeather().getWeathers().get(0).getDescription());
 //        mTempText.setText(String.valueOf( mCurrentWeather.getCurrentWeather().getTemp()));
 //        mTempText.setText(1);
         return rootView;
