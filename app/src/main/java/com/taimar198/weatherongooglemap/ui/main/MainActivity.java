@@ -22,6 +22,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -107,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        new ParserCoorFromKML(getApplicationContext(), this).execute();
         mWeatherForecastResponse = new WeatherForecastResponse();
         Places.initialize(getApplicationContext(), BuildConfig.CONSUMER_GMAP_KEY);
 
@@ -277,7 +279,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        new ParserCoorFromKML(getApplicationContext(), this).execute();
+        mMap.getUiSettings().setZoomControlsEnabled(true);
         // Add a marker in Sydney and move the camera
         LatLng hanoi = new LatLng(8.853223018000051, 105.05491863700007);
         Marker marker = mMap.addMarker(new MarkerOptions()
@@ -364,14 +366,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onSuccess(List<PlaceMark> placeMarkList) {
-        System.out.println("done");
         mPlaceMarkList = placeMarkList;
         Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                 .clickable(true)
-                .addAll(mPlaceMarkList.get(0).getLatLngs()));
+                .addAll(mPlaceMarkList.get(10).getLatLngs()));
         mMap.moveCamera(CameraUpdateFactory
-                .newLatLngZoom(mPlaceMarkList.get(0).getLatLngs().get(0), DEFAULT_ZOOM));
-        System.out.println(mPlaceMarkList.get(0).getLatLngs().get(0).toString());
+                .newLatLngZoom(mPlaceMarkList.get(10).getLatLngs().get(0), DEFAULT_ZOOM));
     }
 
     @Override
