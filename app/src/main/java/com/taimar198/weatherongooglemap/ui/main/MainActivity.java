@@ -4,13 +4,11 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
-import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -45,7 +43,6 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.android.data.Geometry;
 import com.google.maps.android.data.kml.KmlContainer;
-import com.google.maps.android.data.kml.KmlLayer;
 import com.google.maps.android.data.kml.KmlPlacemark;
 import com.google.maps.android.data.kml.KmlPolygon;
 import com.google.maps.android.heatmaps.WeightedLatLng;
@@ -56,7 +53,7 @@ import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
-import com.taimar198.weatherongooglemap.ui.WeatherAppWidget;
+import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
 import com.taimar198.weatherongooglemap.ui.map.MapContract;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -64,11 +61,8 @@ import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.jsoup.parser.Parser;
 import org.jsoup.select.Elements;
-import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -146,17 +140,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                placeMark.setDistrict(es.get(5).text());
                String [] coors =  e.select("coordinates").text().split(",");
                List<LatLng> latLngs = new ArrayList<>();
-
+//                System.out.println(Arrays.toString(coors));
                for (int i = 0; i< coors.length -1; i++) {
-                   String[] temp = coors[i].split(" ");
+                   String[] temp = coors[i].trim().split(" ");
                    if (i ==0 ) {
                        latLngs.add(new LatLng(Double.parseDouble(coors[0]),
                                Double.parseDouble(coors[coors.length-1])));
                    }else
                    latLngs.add(new LatLng(Double.parseDouble(temp[0]),
                            Double.parseDouble(temp[1])));
-//                   System.out.println(latLngs.get(i).toString());
-               }
+//                   System.out.println(latLngs.toString());
+            }
                placeMark.setLatLngs(latLngs);
                mPlaceMarkList.add(placeMark);
             }
@@ -404,7 +398,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         Polyline polyline1 = googleMap.addPolyline(new PolylineOptions()
                 .clickable(true)
-                .add(mPlaceMarkList.get(0).getLatLngs().toArray(new LatLng[0])));
+                .addAll(mPlaceMarkList.get(0).getLatLngs()));
 
         System.out.println(mPlaceMarkList.get(0).getDistrict());
 

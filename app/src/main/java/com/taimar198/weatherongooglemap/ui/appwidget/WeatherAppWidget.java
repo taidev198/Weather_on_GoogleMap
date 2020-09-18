@@ -1,4 +1,4 @@
-package com.taimar198.weatherongooglemap.ui;
+package com.taimar198.weatherongooglemap.ui.appwidget;
 
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
@@ -16,14 +16,11 @@ import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.model.Weather;
-import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
-import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
-import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
-import com.taimar198.weatherongooglemap.ui.main.CardAdapter;
+import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.net.InetAddress;
+import java.util.List;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -88,13 +85,14 @@ public class WeatherAppWidget extends AppWidgetProvider{
                             // Display weather data on widget
                             remoteViews.setTextViewText(R.id.date_weather_text, Methods.formatDate());
 
+                            List<WeatherResponse> weatherResponseList = weatherForecastResponses
+                                    .getCurrentWeather()
+                                    .getWeathers();
                             remoteViews.setImageViewResource(R.id.icon_weather_widget,
-                                    Methods.getDrawable(weatherForecastResponses.getCurrentWeather().getWeathers().get(0).getIcon(),
+                                    Methods.getDrawable(weatherResponseList.get(0).getIcon(),
                                     context));
 
-                            remoteViews.setTextViewText(R.id.address_weather_text, weatherForecastResponses
-                                    .getCurrentWeather()
-                                    .getWeathers()
+                            remoteViews.setTextViewText(R.id.address_weather_text, weatherResponseList
                                     .get(0)
                                     .getDescription());
                             // Apply the changes
@@ -117,55 +115,6 @@ public class WeatherAppWidget extends AppWidgetProvider{
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
-
-//        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitNetwork().build();
-//        StrictMode.setThreadPolicy(policy);
-//        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.weather_app_widget);
-//        remoteViews.setTextViewText(R.id.date_weather_text, "hihi");
-//        ComponentName watchWidget = new ComponentName(context, WeatherAppWidget.class);
-//
-//        Toast.makeText(context, "Requested", Toast.LENGTH_SHORT).show();
-//        if (isInternetConnected()) {
-//            mWeatherApi = UtilsApi.getAPIService();
-//            mWeatherApi.requestRepos("15",
-//                    "105",
-//                    "hourly,daily",
-//                    "vi",
-//                    "metric",
-//                    "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
-//                    .observeOn(AndroidSchedulers.mainThread())
-//                    .subscribe(new Observer<WeatherForecastResponse>() {
-//                        @Override
-//                        public void onSubscribe(Disposable d) {
-//
-//                        }
-//
-//                        @Override
-//                        public void onNext(WeatherForecastResponse weatherForecastResponses) {
-//                            System.out.println(weatherForecastResponses
-//                                    .getCurrentWeather()
-//                                    .getWeathers()
-//                                    .get(0)
-//                                    .getDescription());
-//                            remoteViews.setTextViewText(R.id.address_weather_text, weatherForecastResponses
-//                                    .getCurrentWeather()
-//                                    .getWeathers()
-//                                    .get(0)
-//                                    .getDescription());
-//                        }
-//
-//                        @Override
-//                        public void onError(Throwable e) {
-//                            System.out.println(e.toString());
-//                        }
-//
-//                        @Override
-//                        public void onComplete() {
-//
-//                        }
-//                    });
-//        }
-
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
@@ -183,10 +132,6 @@ public class WeatherAppWidget extends AppWidgetProvider{
         // Enter relevant functionality for when the last widget is disabled
     }
 
-    private static void setRemoteAdapter(Context context, @NonNull final RemoteViews views) {
-//        views.setRemoteAdapter(R.id.widget_list,
-//                new Intent(context, WidgetService.class));
-    }
     // Custom method to check internet connection
     public Boolean isInternetConnected(){
         boolean status = false;
