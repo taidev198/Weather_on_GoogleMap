@@ -8,6 +8,7 @@ import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
+import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -21,8 +22,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -70,9 +73,12 @@ public class Methods {
 //                });
     }
 
-    public static List<PlaceMark> getPlaceMarkList(Context context) {
+    public static PlaceMarkList getPlaceMarkList(Context context) {
         InputStream in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
+        PlaceMarkList placeMarkList = new PlaceMarkList();
         List<PlaceMark> mPlaceMarkList = new ArrayList<>();
+        Map<String, List<String>> mLocation = new HashMap<>();
+        List<String> disList = new ArrayList<>();
         Document doc = null;
         try {
             doc = Jsoup.parse(in_s, "UTF-8", "");
@@ -82,6 +88,13 @@ public class Methods {
                 Elements es =  e.select("SimpleData");
                 placeMark.setProvince(es.get(2).text());
                 placeMark.setDistrict(es.get(3).text());
+                if (mLocation.size() ==0 || !mLocation.containsKey(placeMark.getProvince())) {
+                    mLocation.put(placeMark.getProvince(), new ArrayList<String>());
+                } else {
+                    disList = mLocation.get(placeMark.getProvince());
+                    disList.add(placeMark.getDistrict());
+//                    mLocation.put(placeMark.getProvince(), disList);
+                }
                 placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
                 String [] coors =  e.select("coordinates").text().split(" ");
             //    System.out.println(Arrays.toString(coors));
@@ -99,7 +112,10 @@ public class Methods {
         } catch (IOException e) {
             e.printStackTrace();
         }
-            return mPlaceMarkList;
+        System.out.println(mLocation.toString());
+        placeMarkList.setPlaceMarkList(mPlaceMarkList);
+        placeMarkList.setLocation(mLocation);
+            return placeMarkList;
     }
 
     public static String formatDate() {

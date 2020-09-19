@@ -20,6 +20,7 @@
         <receiver android:name=".ui.appwidget.WeatherAppWidget">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.taimar198.weatherongooglemap.ui.appwidget.TEXT_CHANGED" />
             </intent-filter>
 
             <meta-data

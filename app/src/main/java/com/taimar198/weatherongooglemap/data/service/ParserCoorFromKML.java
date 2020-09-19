@@ -4,13 +4,14 @@ import android.content.Context;
 import android.os.AsyncTask;
 
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
+import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.util.List;
 
-public class ParserCoorFromKML extends AsyncTask<Void, Void, List<PlaceMark>> {
+public class ParserCoorFromKML extends AsyncTask<Void, Void, PlaceMarkList> {
 
-    private List<PlaceMark> mPlaceMarkList;
+    private PlaceMarkList mPlaceMarkList;
     private OnParsingData mListener;
     private Context mContext;
 
@@ -21,20 +22,20 @@ public class ParserCoorFromKML extends AsyncTask<Void, Void, List<PlaceMark>> {
 
 
     @Override
-    protected List<PlaceMark> doInBackground(Void... voids) {
+    protected PlaceMarkList doInBackground(Void... voids) {
 
         return Methods.getPlaceMarkList(mContext);
     }
 
     @Override
-    protected void onPostExecute(List<PlaceMark> result) {
+    protected void onPostExecute(PlaceMarkList result) {
         super.onPostExecute(result);
 
         mListener.onSuccess(result);
     }
 
     public interface OnParsingData {
-        void onSuccess(List<PlaceMark> placeMarkList);
+        void onSuccess(PlaceMarkList placeMarkList);
         void onFailure(Exception e);
     }
 }
