@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.main.MainActivity">
-
 
 
     <fragment
@@ -18,14 +16,14 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         tools:context=".ui.main.MainActivity" />
-<!--    <fragment-->
-<!--        android:id="@+id/autocomplete_fragment"-->
-<!--        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" />-->
+    <!--    <fragment-->
+    <!--        android:id="@+id/autocomplete_fragment"-->
+    <!--        android:name="com.google.android.libraries.places.widget.AutocompleteSupportFragment"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <androidx.cardview.widget.CardView
         android:id="@+id/idCardView"
@@ -58,57 +56,28 @@
         app:layout_constraintStart_toStartOf="parent" />
 
     <Spinner
-        android:id="@+id/spinner_location"
-        android:layout_width="409dp"
+        android:id="@+id/spinner_province"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline4"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/idCardView" />
 
-    <!--    <androidx.appcompat.widget.Toolbar-->
-<!--        android:id="@+id/toolbar"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_marginStart="@dimen/dp_2"-->
-<!--        android:layout_marginTop="@dimen/dp_2"-->
-<!--        android:background="?attr/colorPrimary"-->
-<!--        android:minHeight="?attr/actionBarSize"-->
-<!--        android:theme="?attr/actionBarTheme"-->
-<!--        app:layout_constraintEnd_toEndOf="parent"-->
-<!--        app:layout_constraintStart_toStartOf="parent"-->
-<!--        app:layout_constraintTop_toTopOf="parent" >-->
-<!--        <androidx.constraintlayout.widget.ConstraintLayout-->
-<!--            android:layout_width="match_parent"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            tools:context=".ui.main.MainActivity" >-->
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        app:layout_constraintGuide_begin="20dp" />
 
-<!--&lt;!&ndash;            <ImageView&ndash;&gt;-->
-<!--&lt;!&ndash;                android:id="@+id/image_back_button"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_width="@dimen/dp_24"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_height="@dimen/dp_24"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_marginTop="@dimen/dp_8"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:layout_marginBottom="@dimen/dp_8"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:adjustViewBounds="true"&ndash;&gt;-->
-<!--&lt;!&ndash;                android:src="@drawable/ic_left_arrow"&ndash;&gt;-->
-<!--&lt;!&ndash;                app:layout_constraintBottom_toBottomOf="parent"&ndash;&gt;-->
-<!--&lt;!&ndash;                app:layout_constraintStart_toStartOf="parent"&ndash;&gt;-->
-<!--&lt;!&ndash;                app:layout_constraintTop_toTopOf="parent" />&ndash;&gt;-->
-
-<!--            <SearchView-->
-<!--                android:id="@+id/search_view"-->
-<!--                android:layout_width="wrap_content"-->
-<!--                android:layout_height="wrap_content"-->
-<!--                android:iconifiedByDefault="false"-->
-<!--                android:layoutDirection="rtl"-->
-<!--                android:queryHint="@string/text_search_hint"-->
-<!--                android:searchIcon="@null"-->
-<!--                app:layout_constraintBottom_toBottomOf="parent"-->
-<!--                app:layout_constraintEnd_toEndOf="parent"-->
-<!--                app:layout_constraintStart_toStartOf="parent"-->
-<!--                app:layout_constraintTop_toTopOf="parent"-->
-<!--                app:queryBackground="@android:color/transparent" />-->
-<!--        </androidx.constraintlayout.widget.ConstraintLayout>-->
-<!--    </androidx.appcompat.widget.Toolbar>-->
+    <Spinner
+        android:id="@+id/spinner_district"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/spinner_province"
+        app:layout_constraintTop_toBottomOf="@+id/idCardView" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,6 +8,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
@@ -24,15 +26,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.UiSettings;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolygonOptions;
-import com.google.android.gms.maps.model.Polyline;
-import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.TileOverlay;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -45,10 +41,9 @@ import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
-import com.taimar198.weatherongooglemap.data.repository.CurrentWeatherRepository;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
+import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
 
 import java.io.IOException;
@@ -72,11 +67,13 @@ import io.reactivex.schedulers.Schedulers;
  * https://www.tutlane.com/tutorial/android/android-xml-parsing-using-sax-parser
  * https://github.com/openstreetmap/splitter/blob/master/src/uk/me/parabola/splitter/kml/KmlParser.java
  * tutlane.com/tutorial/android/android-xml-parsing-using-sax-parser
+ * //spinner
+ * https://mkyong.com/android/android-spinner-drop-down-list-example/
  * https://www.google.com/search?q=reading+coordinates+in+kml+file+with+jsoup&oq=reading+coordinates+in+kml+file+with+jsoup&aqs=chrome..69i57.19692j0j4&sourceid=chrome&ie=UTF-8
  * */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        ParserCoorFromKML.OnParsingData {
+        ParserCoorFromKML.OnParsingData, AdapterView.OnItemSelectedListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -93,7 +90,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private WeatherForecastResponse mWeatherForecastResponse;
     private PlaceMarkList mPlaceMarkList;
     private ViewPager mPager;
-    private Spinner mSpinnerLocation;
+    private Spinner mSpinnerProvince;
+    private Spinner mSpinnerDistrict;
 
 
     /**
@@ -111,7 +109,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
-        mSpinnerLocation = findViewById(R.id.spinner_location);
+        mSpinnerProvince = findViewById(R.id.spinner_province);
+        mSpinnerDistrict = findViewById(R.id.spinner_district);
         new ParserCoorFromKML(getApplicationContext(), this).execute();
         mWeatherForecastResponse = new WeatherForecastResponse();
         mPager = findViewById(R.id.weather_pager);
@@ -366,15 +365,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSuccess(PlaceMarkList placeMarkList) {
         mPlaceMarkList = placeMarkList;
-        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-                .clickable(true)
-                .addAll(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs()));
-        mMap.moveCamera(CameraUpdateFactory
-                .newLatLngZoom(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs().get(0), DEFAULT_ZOOM));
+//        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+//                .clickable(true)
+//                .addAll(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs()));
+//        mMap.moveCamera(CameraUpdateFactory
+//                .newLatLngZoom(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs().get(0), DEFAULT_ZOOM));
+
+        ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,
+                placeMarkList.getLocation().keySet()
+                .toArray(new String[0]));
+        mSpinnerProvince.setOnItemSelectedListener(new SpinnerProvinceListener(this, placeMarkList.getLocation()));
+        aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        //Setting the ArrayAdapter data on the Spinner
+        mSpinnerProvince.setAdapter(aa);
     }
 
     @Override
     public void onFailure(Exception e) {
+
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        System.out.println(adapterView.getItemAtPosition(i));
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
 
     }
 }
