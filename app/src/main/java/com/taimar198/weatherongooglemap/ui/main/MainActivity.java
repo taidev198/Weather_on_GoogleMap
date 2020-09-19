@@ -29,6 +29,8 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
+import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -49,8 +51,10 @@ import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -81,6 +85,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private PlacesClient placesClient;
     private boolean locationPermissionGranted = false;
     private static final int DEFAULT_ZOOM = 15;
+    private static final int DISTRICT_ZOOM = 12;
     private WeatherApi mWeatherApi;
     // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
@@ -365,15 +370,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onSuccess(PlaceMarkList placeMarkList) {
         mPlaceMarkList = placeMarkList;
-//        Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
-//                .clickable(true)
-//                .addAll(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs()));
-//        mMap.moveCamera(CameraUpdateFactory
-//                .newLatLngZoom(mPlaceMarkList.getPlaceMarkList().get(100).getLatLngs().get(0), DEFAULT_ZOOM));
-
         ArrayAdapter aa = new ArrayAdapter(this,android.R.layout.simple_spinner_item,
-                placeMarkList.getLocation().keySet()
-                .toArray(new String[0]));
+                placeMarkList.getLocation().keySet().toArray(new String[0]));
         mSpinnerProvince.setOnItemSelectedListener(new SpinnerProvinceListener(this, placeMarkList.getLocation()));
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //Setting the ArrayAdapter data on the Spinner
@@ -387,7 +385,22 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+        System.out.println(mSpinnerProvince.getSelectedItem().toString());
         System.out.println(adapterView.getItemAtPosition(i));
+        String province = mSpinnerProvince.getSelectedItem().toString();
+        String district = adapterView.getItemAtPosition(i).toString();
+        if (!province.equals("TỈNH") && !district.equals("HUYỆN")) {
+            List<LatLng> latLngs = mPlaceMarkList.getLocation()
+                    .get(province)
+                    .get(district);
+            mMap.clear();
+            Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                    .clickable(true)
+                    .addAll(latLngs));
+            mMap.moveCamera(CameraUpdateFactory
+                    .newLatLngZoom(latLngs.get(0), DISTRICT_ZOOM));
+        }
+
     }
 
     @Override

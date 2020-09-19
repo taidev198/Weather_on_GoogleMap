@@ -23,6 +23,7 @@ import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -77,7 +78,7 @@ public class Methods {
         InputStream in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
         PlaceMarkList placeMarkList = new PlaceMarkList();
         List<PlaceMark> mPlaceMarkList = new ArrayList<>();
-        Map<String, Map<String, List<LatLng>>> mLocation = new HashMap<>();
+        Map<String, Map<String, List<LatLng>>> mLocation = new LinkedHashMap<>();
         List<String> disList = new ArrayList<>();
         Document doc = null;
         try {
@@ -88,10 +89,18 @@ public class Methods {
                 Elements es =  e.select("SimpleData");
                 placeMark.setProvince(es.get(2).text());
                 placeMark.setDistrict(es.get(3).text());
-                if (mLocation.size() ==0 || !mLocation.containsKey(placeMark.getProvince())) {
-                    mLocation.put(placeMark.getProvince(), new HashMap<>());
-                } else {
+                if (mLocation.size() == 0 || !mLocation.containsKey(placeMark.getProvince())) {
+                    if (mLocation.size() == 0) {
+                        Map<String, List<LatLng>> dis = new LinkedHashMap<>();
+                        dis.put("HUYỆN", new ArrayList<>());
+                        mLocation.put("TỈNH", dis);
+                    }
+                    mLocation.put(placeMark.getProvince(), new LinkedHashMap<>());
+                }
+
                     Map<String, List<LatLng>> dis = mLocation.get(placeMark.getProvince());
+                    if (dis.size() == 0)
+                        dis.put("HUYỆN", new ArrayList<>());
                     disList.add(placeMark.getDistrict());
                     placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
                     String[] coors = e.select("coordinates").text().split(" ");
@@ -105,7 +114,7 @@ public class Methods {
                     mPlaceMarkList.add(placeMark);
                     dis.put(placeMark.getDistrict(), latLngs);//dis - lat
                 }
-            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -17,8 +17,10 @@ import org.jsoup.select.Collector;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -37,8 +39,8 @@ public class SpinnerProvinceListener implements AdapterView.OnItemSelectedListen
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
     //create spinner district here?
         System.out.println(mProvince.get(adapterView.getItemAtPosition(pos)).keySet().toString());
-        ArrayAdapter aa = new ArrayAdapter(mContext,android.R.layout.simple_spinner_item,
-                mProvince.get(adapterView.getItemAtPosition(pos)).keySet().toArray(new String[mProvince.get(adapterView.getItemAtPosition(pos)).keySet().size()]));
+        ArrayAdapter aa = new ArrayAdapter(mContext,android.R.layout.simple_spinner_item, mProvince.get(adapterView.getItemAtPosition(pos)).keySet()
+                .toArray(new String[mProvince.get(adapterView.getItemAtPosition(pos)).keySet().size()]));
         mSpinnerDistrict.setOnItemSelectedListener((AdapterView.OnItemSelectedListener) mContext);
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //Setting the ArrayAdapter data on the Spinner
