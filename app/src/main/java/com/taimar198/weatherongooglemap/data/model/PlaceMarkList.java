@@ -1,12 +1,14 @@
 package com.taimar198.weatherongooglemap.data.model;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.util.List;
 import java.util.Map;
 
 public class PlaceMarkList {
 
     private List<PlaceMark> mPlaceMarkList;
-    private Map<String, List<String>> mLocation;
+    private Map<String, Map<String, List<LatLng>>> mLocation;
 
     public PlaceMarkList() {
 
@@ -20,11 +22,11 @@ public class PlaceMarkList {
         this.mPlaceMarkList = mPlaceMarkList;
     }
 
-    public Map<String, List<String>> getLocation() {
+    public Map<String, Map<String, List<LatLng>>> getLocation() {
         return mLocation;
     }
 
-    public void setLocation(Map<String, List<String>> mLocation) {
+    public void setLocation(Map<String, Map<String, List<LatLng>>> mLocation) {
         this.mLocation = mLocation;
     }
 }

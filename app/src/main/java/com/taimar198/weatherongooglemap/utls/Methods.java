@@ -77,7 +77,7 @@ public class Methods {
         InputStream in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
         PlaceMarkList placeMarkList = new PlaceMarkList();
         List<PlaceMark> mPlaceMarkList = new ArrayList<>();
-        Map<String, List<String>> mLocation = new HashMap<>();
+        Map<String, Map<String, List<LatLng>>> mLocation = new HashMap<>();
         List<String> disList = new ArrayList<>();
         Document doc = null;
         try {
@@ -89,30 +89,27 @@ public class Methods {
                 placeMark.setProvince(es.get(2).text());
                 placeMark.setDistrict(es.get(3).text());
                 if (mLocation.size() ==0 || !mLocation.containsKey(placeMark.getProvince())) {
-                    mLocation.put(placeMark.getProvince(), new ArrayList<String>());
+                    mLocation.put(placeMark.getProvince(), new HashMap<>());
                 } else {
-                    disList = mLocation.get(placeMark.getProvince());
+                    Map<String, List<LatLng>> dis = mLocation.get(placeMark.getProvince());
                     disList.add(placeMark.getDistrict());
-//                    mLocation.put(placeMark.getProvince(), disList);
+                    placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
+                    String[] coors = e.select("coordinates").text().split(" ");
+                    List<LatLng> latLngs = new ArrayList<>();
+                    for (String coor : coors) {
+                        String[] temp = coor.split(",");
+                        latLngs.add(new LatLng(Double.parseDouble(temp[1]),
+                                Double.parseDouble(temp[0])));
+                    }
+                    placeMark.setLatLngs(latLngs);
+                    mPlaceMarkList.add(placeMark);
+                    dis.put(placeMark.getDistrict(), latLngs);//dis - lat
                 }
-                placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
-                String [] coors =  e.select("coordinates").text().split(" ");
-            //    System.out.println(Arrays.toString(coors));
-                List<LatLng> latLngs = new ArrayList<>();
-                for (int i = 0; i< coors.length; i++) {
-                    String[] temp = coors[i].split(",");
-                    latLngs.add(new LatLng(Double.parseDouble(temp[1]),
-                            Double.parseDouble(temp[0])));
-                  //  System.out.println(latLngs.get(i).toString());
-                }
-                placeMark.setLatLngs(latLngs);
-                mPlaceMarkList.add(placeMark);
-                //break;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        System.out.println(mLocation.toString());
+//        System.out.println(mLocation.toString());
         placeMarkList.setPlaceMarkList(mPlaceMarkList);
         placeMarkList.setLocation(mLocation);
             return placeMarkList;
