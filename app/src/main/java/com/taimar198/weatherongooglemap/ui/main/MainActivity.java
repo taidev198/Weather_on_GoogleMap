@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     /**
      * The pager adapter, which provides the pages to the view pager widget.
      */
-    private FragmentPagerAdapter pagerAdapter;
+    private FragmentStatePagerAdapter pagerAdapter;
     private ArrayList<LatLng>  mLatLngList = new ArrayList<>();
 
     @Override
@@ -188,14 +189,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                 .get(0)
                                 .getDescription());
                         mWeatherForecastResponse = weatherForecastResponses;
-                        if (pagerAdapter != null) {
-                            pagerAdapter.notifyDataSetChanged();
-                            System.out.println("not null");
-                        }else {
-                            pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
-                        }
+                        pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
+                        pagerAdapter.notifyDataSetChanged();
                         mPager.setAdapter(pagerAdapter);
-//                        mPager.getAdapter().notifyDataSetChanged();
                     }
 
                     @Override

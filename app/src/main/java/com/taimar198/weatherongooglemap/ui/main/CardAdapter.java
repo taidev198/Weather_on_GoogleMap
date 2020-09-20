@@ -4,12 +4,13 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.fragment.app.FragmentStatePagerAdapter;
 
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
-
-public class CardAdapter  extends FragmentPagerAdapter {
+/***https://stackoverflow.com/questions/7263291/viewpager-pageradapter-not-updating-the-view#:~:text=So%20when%20you%20want%20to,want%20to%20update%20some%20value.*/
+public class CardAdapter  extends FragmentStatePagerAdapter {
 
     private WeatherForecastResponse mCurrentWeather;
 
