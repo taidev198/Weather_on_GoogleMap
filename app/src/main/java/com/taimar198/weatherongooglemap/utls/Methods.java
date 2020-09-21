@@ -99,8 +99,11 @@ public class Methods {
                 }
 
                     Map<String, List<LatLng>> dis = mLocation.get(placeMark.getProvince());
-                    if (dis.size() == 0)
+                    if (dis.size() == 0){
                         dis.put("HUYỆN", new ArrayList<>());
+                        dis.put("TẤT CẢ", new ArrayList<>());
+                    }
+
                     disList.add(placeMark.getDistrict());
                     placeMark.setPopulation(Integer.parseInt(es.get(4).text()));
                     String[] coors = e.select("coordinates").text().split(" ");

@@ -1,17 +1,23 @@
 package com.taimar198.weatherongooglemap.ui.appwidget;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProvider;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.os.StrictMode;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 
+import com.google.android.gms.location.LocationListener;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
@@ -28,16 +34,21 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
+ * http://amo.gov.vn/radar/
  * Implementation of App Widget functionality.
  * https://medium.com/coding-blocks/creating-a-widget-for-your-android-app-1ee915e6af3e
  * https://android--examples.blogspot.com/2015/10/android-how-to-create-weather-widget.html
  * https://www.vogella.com/tutorials/AndroidWidgets/article.html#updates
  */
-public class WeatherAppWidget extends AppWidgetProvider{
+public class WeatherAppWidget extends AppWidgetProvider implements LocationListener {
 
     public static String UPDATE_ACTION = "ActionUpdateWeatherWidget";
     private WeatherApi mWeatherApi;
     public static final String ACTION_TEXT_CHANGED = "com.taimar198.weatherongooglemap.ui.appwidget.TEXT_CHANGED";
+    protected LocationManager locationManager;
+    protected LocationListener locationListener;
+    protected String latitude, longitude;
+    protected boolean gps_enabled, network_enabled;
 
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
@@ -105,7 +116,7 @@ public class WeatherAppWidget extends AppWidgetProvider{
                                     .get(0)
                                     .getDescription());
 
-                            remoteViews.setTextViewText(R.id.temp_widget, String.valueOf( weatherForecastResponses
+                            remoteViews.setTextViewText(R.id.temp_widget, String.valueOf(weatherForecastResponses
                                     .getCurrentWeather()
                                     .getTemp()));
                             // Apply the changes
@@ -128,6 +139,22 @@ public class WeatherAppWidget extends AppWidgetProvider{
     @Override
     public void onUpdate(Context context, AppWidgetManager appWidgetManager, int[] appWidgetIds) {
         // There may be multiple widgets active, so update all of them
+        locationManager = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // TODO: Consider calling
+            //    ActivityCompat#requestPermissions
+            // here to request the missing permissions, and then overriding
+            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+            //                                          int[] grantResults)
+            // to handle the case where the user grants the permission. See the documentation
+            // for ActivityCompat#requestPermissions for more details.
+            locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    0,
+                    0,
+                    (android.location.LocationListener) this);
+        }
+
         for (int appWidgetId : appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId);
         }
@@ -161,6 +188,12 @@ public class WeatherAppWidget extends AppWidgetProvider{
         }
         return status;
     }
+
+    @Override
+    public void onLocationChanged(Location location) {
+        System.out.println(location.getLatitude() + "----" +location.getLongitude());
+    }
+
     public interface OnDataReceived {
         void receiveData(WeatherForecastResponse weatherForecastResponse);
     }

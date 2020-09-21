@@ -55,6 +55,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
 import io.reactivex.Observer;
@@ -74,6 +75,7 @@ import io.reactivex.schedulers.Schedulers;
  * tutlane.com/tutorial/android/android-xml-parsing-using-sax-parser
  * //spinner
  * https://mkyong.com/android/android-spinner-drop-down-list-example/
+ * //get current location
  * https://www.google.com/search?q=reading+coordinates+in+kml+file+with+jsoup&oq=reading+coordinates+in+kml+file+with+jsoup&aqs=chrome..69i57.19692j0j4&sourceid=chrome&ie=UTF-8
  * */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
@@ -380,21 +382,33 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+    public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
         System.out.println(mSpinnerProvince.getSelectedItem().toString());
-        System.out.println(adapterView.getItemAtPosition(i));
+        System.out.println(adapterView.getItemAtPosition(pos));
         String province = mSpinnerProvince.getSelectedItem().toString();
-        String district = adapterView.getItemAtPosition(i).toString();
-        if (!province.equals("TỈNH") && !district.equals("HUYỆN")) {
+        String district = adapterView.getItemAtPosition(pos).toString();
+        mMap.clear();
+        if (!province.equals("TỈNH") && !district.equals("HUYỆN") && !district.equals("TẤT CẢ")) {
             List<LatLng> latLngs = mPlaceMarkList.getLocation()
                     .get(province)
                     .get(district);
-            mMap.clear();
             Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
                     .addAll(latLngs));
             mMap.moveCamera(CameraUpdateFactory
                     .newLatLngZoom(latLngs.get(0), DISTRICT_ZOOM));
+        }else if (district.equals("TẤT CẢ")) {
+            System.out.println("selected");
+            Map<String, List<LatLng>> districtList = mPlaceMarkList.getLocation()
+                    .get(province);
+            String[] disString = districtList.keySet().toArray(new String[0]);
+            for (String s : disString) {
+                if (!s.equals("HUYỆN") && !s.equals("TẤT CẢ")) {
+                    Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
+                            .clickable(true)
+                            .addAll(districtList.get(s)));
+                }
+            }
         }
 
     }
