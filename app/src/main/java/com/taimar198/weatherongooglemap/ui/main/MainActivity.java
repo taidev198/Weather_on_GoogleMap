@@ -48,6 +48,7 @@ import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
+import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -185,11 +186,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     }
                     @Override
                     public void onNext(WeatherForecastResponse weatherForecastResponses) {
-                        System.out.println(weatherForecastResponses
-                                .getCurrentWeather()
-                                .getWeathers()
-                                .get(0)
-                                .getDescription());
                         mWeatherForecastResponse = weatherForecastResponses;
                         pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
                         pagerAdapter.notifyDataSetChanged();
@@ -388,6 +384,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         String province = mSpinnerProvince.getSelectedItem().toString();
         String district = adapterView.getItemAtPosition(pos).toString();
         mMap.clear();
+        List<LatLng> latLngsFromAddress = new ArrayList<>();
         if (!province.equals("TỈNH") && !district.equals("HUYỆN") && !district.equals("TẤT CẢ")) {
             List<LatLng> latLngs = mPlaceMarkList.getLocation()
                     .get(province)
@@ -395,10 +392,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
                     .addAll(latLngs));
+          Methods.getCoorsFromAddress(mWeatherApi, province, district, latLngsFromAddress);
             mMap.moveCamera(CameraUpdateFactory
                     .newLatLngZoom(latLngs.get(0), DISTRICT_ZOOM));
         }else if (district.equals("TẤT CẢ")) {
-            System.out.println("selected");
             Map<String, List<LatLng>> districtList = mPlaceMarkList.getLocation()
                     .get(province);
             String[] disString = districtList.keySet().toArray(new String[0]);
@@ -407,6 +404,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                             .clickable(true)
                             .addAll(districtList.get(s)));
+                    Methods.getCoorsFromAddress(mWeatherApi, province, s, latLngsFromAddress);
+                    System.out.println(latLngsFromAddress.get(2));
                 }
             }
         }

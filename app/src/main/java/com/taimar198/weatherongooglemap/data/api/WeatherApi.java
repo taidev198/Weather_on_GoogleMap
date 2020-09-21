@@ -1,5 +1,7 @@
 package com.taimar198.weatherongooglemap.data.api;
 
+import com.taimar198.weatherongooglemap.data.api.response.GeocodingResponse;
+import com.taimar198.weatherongooglemap.data.api.response.GeometryResponse;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 
@@ -8,6 +10,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
+import retrofit2.http.Url;
 
 public interface WeatherApi {
 
@@ -24,4 +27,6 @@ public interface WeatherApi {
                                                            @Query("lang") String lang,
                                                            @Query("units") String units,
                                                            @Query("appid") String api);
+    @GET
+    Observable<GeocodingResponse> getCoors(@Url String url);
 }

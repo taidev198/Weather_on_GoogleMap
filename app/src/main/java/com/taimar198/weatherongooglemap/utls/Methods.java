@@ -5,7 +5,11 @@ import android.graphics.drawable.Drawable;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
+import com.taimar198.weatherongooglemap.data.api.WeatherApi;
+import com.taimar198.weatherongooglemap.data.api.response.GeocodingResponse;
+import com.taimar198.weatherongooglemap.data.api.response.GeometryResponse;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
@@ -35,43 +39,33 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Methods {
 
-    public static void fetchingDataUsingRetrofit() {
-//        mWeatherApi = UtilsApi.getAPIService();
-//        mWeatherApi.requestRepos("15",
-//                "105",
-//                "hourly,daily",
-//                "vi",
-//                "metric",
-//                "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
-//                .observeOn(AndroidSchedulers.mainThread())
-//                .subscribe(new Observer<WeatherForecastResponse>() {
-//                    @Override
-//                    public void onSubscribe(Disposable d) {
-//
-//                    }
-//
-//                    @Override
-//                    public void onNext(WeatherForecastResponse weatherForecastResponses) {
-//                        // Display weather data on widget
-//                        remoteViews.setTextViewText(R.id.address_weather_text, weatherForecastResponses
-//                                .getCurrentWeather()
-//                                .getWeathers()
-//                                .get(0)
-//                                .getDescription());
-//                        // Apply the changes
-//                        appWidgetManager.updateAppWidget(watchWidget, remoteViews);
-//                    }
-//
-//                    @Override
-//                    public void onError(Throwable e) {
-//                        System.out.println(e.toString());
-//                    }
-//
-//                    @Override
-//                    public void onComplete() {
-//
-//                    }
-//                });
+    public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, List<LatLng> latLngs) {
+        weatherApi.getCoors("https://maps.googleapis.com/maps/api/geocode/json?address="
+                + district + Constants.COMMA+province + "&key=" + "AIzaSyAqdRuDwUbXJTQ1WwdIIR6_F3k3etpb5Og")
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<GeocodingResponse>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(GeocodingResponse geocodingResponse) {
+                        latLngs.add(new LatLng(geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLat(),
+                                            geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLon()));
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
     }
 
     public static PlaceMarkList getPlaceMarkList(Context context) {
