@@ -1,7 +1,11 @@
 package com.taimar198.weatherongooglemap.utls;
 
+import android.appwidget.AppWidgetManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.widget.RemoteViews;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.model.LatLng;
 import com.taimar198.weatherongooglemap.R;
@@ -11,8 +15,12 @@ import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.GeocodingResponse;
 import com.taimar198.weatherongooglemap.data.api.response.GeometryResponse;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
+import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
+import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
+import com.taimar198.weatherongooglemap.ui.base.OnGetData;
+import com.taimar198.weatherongooglemap.ui.main.CardAdapter;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -39,7 +47,42 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Methods {
 
-    public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, List<LatLng> latLngs) {
+
+    public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, String address) {
+        weatherApi.requestRepos(lat,
+                lon,
+                "hourly,daily",
+                "vi",
+                "metric",
+                "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<WeatherForecastResponse>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+                    @Override
+                    public void onNext(WeatherForecastResponse weatherForecastResponses) {
+//                        mWeatherForecastResponse = weatherForecastResponses;
+//                        pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
+//                        pagerAdapter.notifyDataSetChanged();
+//                        mPager.setAdapter(pagerAdapter);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        System.out.println(e.toString());
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+    }
+
+
+    public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, OnGetData<LatLng> listener) {
         weatherApi.getCoors("https://maps.googleapis.com/maps/api/geocode/json?address="
                 + district + Constants.COMMA+province + "&key=" + "AIzaSyAqdRuDwUbXJTQ1WwdIIR6_F3k3etpb5Og")
                 .subscribeOn(Schedulers.io())
@@ -52,8 +95,8 @@ public class Methods {
 
                     @Override
                     public void onNext(GeocodingResponse geocodingResponse) {
-                        latLngs.add(new LatLng(geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLat(),
-                                            geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLon()));
+                        listener.onSuccess((new LatLng(geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLat(),
+                                            geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLon())));
                     }
 
                     @Override
@@ -119,6 +162,44 @@ public class Methods {
         placeMarkList.setPlaceMarkList(mPlaceMarkList);
         placeMarkList.setLocation(mLocation);
             return placeMarkList;
+    }
+
+    public static void fetchingWeather(final Context context, WeatherApi weatherApi, String lat, String lon, String address,
+                                 OnGetData<WeatherForecastResponse> listener) {
+        final AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(context);
+        final RemoteViews remoteViews = new RemoteViews(context.getPackageName(), R.layout.weather_app_widget);
+        final ComponentName watchWidget = new ComponentName(context, WeatherAppWidget.class);
+        Toast.makeText(context, "Requested", Toast.LENGTH_SHORT).show();
+            weatherApi = UtilsApi.getAPIService();
+            weatherApi.requestRepos(lat,
+                    lon,
+                    "hourly,daily",
+                    "vi",
+                    "metric",
+                    "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(new Observer<WeatherForecastResponse>() {
+                        @Override
+                        public void onSubscribe(Disposable d) {
+
+                        }
+
+                        @Override
+                        public void onNext(WeatherForecastResponse weatherForecastResponses) {
+                            // Display weather data on widget
+                           listener.onSuccess(weatherForecastResponses);
+
+                        }
+                        @Override
+                        public void onError(Throwable e) {
+                            System.out.println(e.toString());
+                        }
+
+                        @Override
+                        public void onComplete() {
+
+                        }
+                    });
     }
 
     public static String formatDate() {

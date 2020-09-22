@@ -39,15 +39,18 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.maps.android.clustering.ClusterManager;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
+import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
+import com.taimar198.weatherongooglemap.ui.base.OnGetData;
 import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.io.IOException;
@@ -81,7 +84,7 @@ import io.reactivex.schedulers.Schedulers;
  * */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        ParserCoorFromKML.OnParsingData, AdapterView.OnItemSelectedListener {
+        ParserCoorFromKML.OnParsingData, AdapterView.OnItemSelectedListener, OnGetData<LatLng> {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -91,23 +94,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private static final int DEFAULT_ZOOM = 15;
     private static final int DISTRICT_ZOOM = 12;
     private WeatherApi mWeatherApi;
-    // The entry point to the Fused Location Provider.
     private FusedLocationProviderClient fusedLocationProviderClient;
-    // The geographical location where the device is currently located. That is, the last-known
-    // location retrieved by the Fused Location Provider.
     private Location lastKnownLocation;
     private WeatherForecastResponse mWeatherForecastResponse;
     private PlaceMarkList mPlaceMarkList;
     private ViewPager mPager;
     private Spinner mSpinnerProvince;
     private Spinner mSpinnerDistrict;
-
-
-    /**
-     * The pager adapter, which provides the pages to the view pager widget.
-     */
+    private ClusterManager<WeatherResponse> mCMWeather;
     private FragmentStatePagerAdapter pagerAdapter;
     private ArrayList<LatLng>  mLatLngList = new ArrayList<>();
+    private OnGetData<LatLng> mListener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -118,6 +115,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        mListener = this;
         mSpinnerProvince = findViewById(R.id.spinner_province);
         mSpinnerDistrict = findViewById(R.id.spinner_district);
         new ParserCoorFromKML(getApplicationContext(), this).execute();
@@ -159,7 +157,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         place.getLatLng().longitude)).
                         title(place.getAddress()));
                 System.out.println(place.getAddress());
-                fetchingWeatherForecast(Double.toString(place.getLatLng().latitude),
+                Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(place.getLatLng().latitude),
                         Double.toString(place.getLatLng().longitude), place.getAddress());
             }
 
@@ -168,40 +166,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
             }
         });
-    }
-
-
-    private void fetchingWeatherForecast(String lat, String lon, String address) {
-        mWeatherApi.requestRepos(lat,
-                lon,
-                "hourly,daily",
-                "vi",
-                "metric",
-                "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Observer<WeatherForecastResponse>() {
-                    @Override
-                    public void onSubscribe(Disposable d) {
-
-                    }
-                    @Override
-                    public void onNext(WeatherForecastResponse weatherForecastResponses) {
-                        mWeatherForecastResponse = weatherForecastResponses;
-                        pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
-                        pagerAdapter.notifyDataSetChanged();
-                        mPager.setAdapter(pagerAdapter);
-                    }
-
-                    @Override
-                    public void onError(Throwable e) {
-                        System.out.println(e.toString());
-                    }
-
-                    @Override
-                    public void onComplete() {
-
-                    }
-                });
     }
 
     private void setUpMap() {
@@ -338,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
 //                                            new LatLng(lastKnownLocation.getLatitude(),
 //                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                                    fetchingWeatherForecast(Double.toString(lastKnownLocation.getLatitude()),
+                                    Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
                                             Double.toString(lastKnownLocation.getLongitude()), address);
                                     Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
                                     intent.putExtra("NewString", "tai");
@@ -373,6 +337,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
+    public void onSuccess(LatLng latLng) {
+        System.out.println(latLng);
+        addMarkerToMap(latLng);
+    }
+
+    @Override
     public void onFailure(Exception e) {
 
     }
@@ -392,7 +362,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
                     .addAll(latLngs));
-          Methods.getCoorsFromAddress(mWeatherApi, province, district, latLngsFromAddress);
+          Methods.getCoorsFromAddress(mWeatherApi, province, district, this);
             mMap.moveCamera(CameraUpdateFactory
                     .newLatLngZoom(latLngs.get(0), DISTRICT_ZOOM));
         }else if (district.equals("TẤT CẢ")) {
@@ -404,8 +374,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                             .clickable(true)
                             .addAll(districtList.get(s)));
-                    Methods.getCoorsFromAddress(mWeatherApi, province, s, latLngsFromAddress);
-                    System.out.println(latLngsFromAddress.get(2));
+                    Methods.getCoorsFromAddress(mWeatherApi, province, s, this);
                 }
             }
         }
@@ -415,5 +384,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onNothingSelected(AdapterView<?> adapterView) {
 
+    }
+    private void addMarkerToMap(LatLng latLng){
+        mMap.addMarker(new MarkerOptions().position(latLng));
     }
 }

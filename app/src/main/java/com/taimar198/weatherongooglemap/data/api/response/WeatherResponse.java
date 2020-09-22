@@ -2,13 +2,18 @@ package com.taimar198.weatherongooglemap.data.api.response;
 
 import android.graphics.Bitmap;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+import com.google.maps.android.clustering.ClusterItem;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.service.DownloadImage;
 import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 
-public class WeatherResponse implements CurrentWeatherDataSource.OnFetchDataListener<Bitmap> {
+public class WeatherResponse implements CurrentWeatherDataSource.OnFetchDataListener<Bitmap>, ClusterItem {
 
     @Expose
     @SerializedName("description")
@@ -46,5 +51,23 @@ public class WeatherResponse implements CurrentWeatherDataSource.OnFetchDataList
     @Override
     public void onFetchDataFailure(Exception e) {
 
+    }
+
+    @NonNull
+    @Override
+    public LatLng getPosition() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public String getSnippet() {
+        return null;
     }
 }
