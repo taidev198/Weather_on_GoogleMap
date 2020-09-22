@@ -1,22 +1,23 @@
 package com.taimar198.weatherongooglemap.data.api.response;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
-import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
-import com.taimar198.weatherongooglemap.data.model.DailyWeather;
-import com.taimar198.weatherongooglemap.data.model.HourlyWeather;
-import com.taimar198.weatherongooglemap.data.model.Weather;
+import com.google.maps.android.clustering.ClusterItem;
 
 import java.util.List;
 
-public class WeatherForecastResponse {
+public class WeatherForecastResponse implements ClusterItem {
 
     @Expose
     @SerializedName("lat")
-    private float lat;
+    private double lat;
     @Expose
     @SerializedName("lon")
-    private float lon;
+    private double lon;
     @Expose
     @SerializedName("current")
     private CurrentWeatherResponse currentWeather;
@@ -37,19 +38,19 @@ public class WeatherForecastResponse {
         Address = address;
     }
 
-    public float getLat() {
+    public double getLat() {
         return lat;
     }
 
-    public void setLat(float lat) {
+    public void setLat(double lat) {
         this.lat = lat;
     }
 
-    public float getLon() {
+    public double getLon() {
         return lon;
     }
 
-    public void setLon(float lon) {
+    public void setLon(double lon) {
         this.lon = lon;
     }
 
@@ -75,5 +76,23 @@ public class WeatherForecastResponse {
 
     public void setHourlyWeatherList(List<CurrentWeatherResponse> hourlyWeatherList) {
         this.hourlyWeatherList = hourlyWeatherList;
+    }
+
+    @NonNull
+    @Override
+    public LatLng getPosition() {
+        return new LatLng(this.lat, this.lon);
+    }
+
+    @Nullable
+    @Override
+    public String getTitle() {
+        return null;
+    }
+
+    @Nullable
+    @Override
+    public String getSnippet() {
+        return null;
     }
 }

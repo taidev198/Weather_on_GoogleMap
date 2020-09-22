@@ -48,7 +48,7 @@ import io.reactivex.schedulers.Schedulers;
 public class Methods {
 
 
-    public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, String address) {
+    public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, OnGetWeatherInfo listener) {
         weatherApi.requestRepos(lat,
                 lon,
                 "hourly,daily",
@@ -63,10 +63,7 @@ public class Methods {
                     }
                     @Override
                     public void onNext(WeatherForecastResponse weatherForecastResponses) {
-//                        mWeatherForecastResponse = weatherForecastResponses;
-//                        pagerAdapter = new CardAdapter(getSupportFragmentManager(),weatherForecastResponses,2);
-//                        pagerAdapter.notifyDataSetChanged();
-//                        mPager.setAdapter(pagerAdapter);
+                        listener.OnGetWeatherInfoSuccess(weatherForecastResponses);
                     }
 
                     @Override
@@ -212,6 +209,10 @@ public class Methods {
         return context.getResources().getIdentifier("icon_" + name,
                 "drawable",
                 context.getPackageName());
+    }
+    public interface OnGetWeatherInfo{
+        void OnGetWeatherInfoSuccess(WeatherForecastResponse weatherForecastResponse);
+        void OnGetWeatherInfoFailure(Exception e);
     }
 
 }

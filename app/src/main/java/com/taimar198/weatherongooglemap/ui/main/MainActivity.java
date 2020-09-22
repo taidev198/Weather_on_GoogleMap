@@ -39,6 +39,7 @@ import com.google.android.libraries.places.api.model.Place;
 import com.google.android.libraries.places.api.net.PlacesClient;
 import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
+import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
@@ -47,6 +48,7 @@ import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
+import com.taimar198.weatherongooglemap.data.model.WeatherRenderer;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
@@ -60,6 +62,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 import io.reactivex.Observer;
@@ -84,7 +87,14 @@ import io.reactivex.schedulers.Schedulers;
  * */
 public class MainActivity extends AppCompatActivity implements OnMapReadyCallback,
         ActivityCompat.OnRequestPermissionsResultCallback,
-        ParserCoorFromKML.OnParsingData, AdapterView.OnItemSelectedListener, OnGetData<LatLng> {
+        ParserCoorFromKML.OnParsingData,
+        AdapterView.OnItemSelectedListener,
+        OnGetData<LatLng>,
+        Methods.OnGetWeatherInfo,
+        ClusterManager.OnClusterClickListener<WeatherForecastResponse>,
+        ClusterManager.OnClusterInfoWindowClickListener<WeatherForecastResponse>,
+        ClusterManager.OnClusterItemClickListener<WeatherForecastResponse>,
+        ClusterManager.OnClusterItemInfoWindowClickListener<WeatherForecastResponse> {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -105,7 +115,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private FragmentStatePagerAdapter pagerAdapter;
     private ArrayList<LatLng>  mLatLngList = new ArrayList<>();
     private OnGetData<LatLng> mListener;
-
+    private ClusterManager<WeatherForecastResponse> mClusterManager;
+    private Random mRandom = new Random(1984);
+    private Methods.OnGetWeatherInfo mWeatherListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -116,6 +128,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void init() {
         mListener = this;
+        mWeatherListener = this;
         mSpinnerProvince = findViewById(R.id.spinner_province);
         mSpinnerDistrict = findViewById(R.id.spinner_district);
         new ParserCoorFromKML(getApplicationContext(), this).execute();
@@ -158,7 +171,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         title(place.getAddress()));
                 System.out.println(place.getAddress());
                 Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(place.getLatLng().latitude),
-                        Double.toString(place.getLatLng().longitude), place.getAddress());
+                        Double.toString(place.getLatLng().longitude), mWeatherListener);
             }
 
             @Override
@@ -172,20 +185,18 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setTiltGesturesEnabled(true);
+        mMap.getUiSettings().setMyLocationButtonEnabled(true);
         //change position of my location
         View locationButton = ((View) findViewById(Integer.parseInt("1")).getParent()).findViewById(Integer.parseInt("2"));
         RelativeLayout.LayoutParams rlp = (RelativeLayout.LayoutParams) locationButton.getLayoutParams();
         // position on right bottom
         rlp.addRule(RelativeLayout.ALIGN_PARENT_TOP, 0);
         rlp.addRule(RelativeLayout.ALIGN_PARENT_BOTTOM, RelativeLayout.TRUE);rlp.setMargins(0,0,30,30);
-        mMap.setOnCircleClickListener(new GoogleMap.OnCircleClickListener() {
-            @Override
-            public void onCircleClick(Circle circle) {
-                // Flip the r, g and b components of the circle's
-                // stroke color.
-                int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
-                circle.setStrokeColor(strokeColor);
-            }
+        mMap.setOnCircleClickListener(circle -> {
+            // Flip the r, g and b components of the circle's
+            // stroke color.
+            int strokeColor = circle.getStrokeColor() ^ 0x00ffffff;
+            circle.setStrokeColor(strokeColor);
         });
     }
 
@@ -303,7 +314,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                                            new LatLng(lastKnownLocation.getLatitude(),
 //                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                                     Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
-                                            Double.toString(lastKnownLocation.getLongitude()), address);
+                                            Double.toString(lastKnownLocation.getLongitude()), mWeatherListener);
                                     Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
                                     intent.putExtra("NewString", "tai");
                                     getApplicationContext().sendBroadcast(intent);
@@ -338,8 +349,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onSuccess(LatLng latLng) {
-        System.out.println(latLng);
-        addMarkerToMap(latLng);
+        System.out.println(latLng.latitude + "----" + latLng.longitude);
+       Methods.fetchingWeatherForecast(mWeatherApi,
+               Double.toString(latLng.latitude),
+               Double.toString(latLng.longitude),
+               this);
+//        addMarkerToMap(latLng);
     }
 
     @Override
@@ -387,5 +402,47 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
     private void addMarkerToMap(LatLng latLng){
         mMap.addMarker(new MarkerOptions().position(latLng));
+    }
+
+    @Override
+    public boolean onClusterClick(Cluster<WeatherForecastResponse> cluster) {
+        return false;
+    }
+
+    @Override
+    public void onClusterInfoWindowClick(Cluster<WeatherForecastResponse> cluster) {
+
+    }
+
+    @Override
+    public boolean onClusterItemClick(WeatherForecastResponse item) {
+        return false;
+    }
+
+    @Override
+    public void onClusterItemInfoWindowClick(WeatherForecastResponse item) {
+
+    }
+
+
+    @Override
+    public void OnGetWeatherInfoSuccess(WeatherForecastResponse weatherForecastResponse) {
+        mClusterManager = new ClusterManager<>(this, mMap);
+        mClusterManager.setRenderer(new WeatherRenderer(this, mMap, mClusterManager));
+        mMap.setOnCameraIdleListener(mClusterManager);
+        mMap.setOnMarkerClickListener(mClusterManager);
+        mMap.setOnInfoWindowClickListener(mClusterManager);
+        mClusterManager.setOnClusterClickListener(this);
+        mClusterManager.setOnClusterInfoWindowClickListener(this);
+        mClusterManager.setOnClusterItemClickListener(this);
+        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
+
+        mClusterManager.addItem(weatherForecastResponse);
+        mClusterManager.cluster();
+    }
+
+    @Override
+    public void OnGetWeatherInfoFailure(Exception e) {
+
     }
 }
