@@ -499,8 +499,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
-        mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
-        mClusterManager.getMarkerCollection().setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
+        mClusterManager.getMarkerCollection()
+                .setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
+        mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
+
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);

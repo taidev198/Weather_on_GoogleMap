@@ -39,6 +39,7 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
     private Context mContext;
     private GoogleMap mMap;
     private TextView mTempText;
+    /**https://stackoverflow.com/questions/39699348/google-map-clustering-in-android*/
     public WeatherRenderer(Context context, GoogleMap googleMap, ClusterManager clusterManager) {
         super(context, googleMap, clusterManager);
         mContext = context;
@@ -49,6 +50,8 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View multiProfile = inflater.inflate(R.layout.multi_profile, null);
         mClusterIconGenerator.setContentView(multiProfile);
+        mClusterIconGenerator.setBackground(null);
+        mIconGenerator.setBackground(null);
         mClusterImageView = multiProfile.findViewById(R.id.image);
         mTempText = multiProfile.findViewById(R.id.temp_marker);
         mImageView = new ImageView(mContext);
@@ -99,7 +102,7 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
     @Override
     protected void onClusterItemRendered(@NonNull WeatherForecastResponse clusterItem, @NonNull Marker marker) {
         super.onClusterItemRendered(clusterItem, marker);
-//        getMarker(clusterItem).setTitle("tai");
+        getMarker(clusterItem).setSnippet(clusterItem.getAddress());
         marker.setTitle(clusterItem.getTitle());
         marker.setSnippet(clusterItem.getAddress());
         getMarker(clusterItem).showInfoWindow();
