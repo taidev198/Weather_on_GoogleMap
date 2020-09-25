@@ -27,11 +27,19 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.Circle;
+import com.google.android.gms.maps.model.GroundOverlay;
+import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.TileOverlay;
+import com.google.android.gms.maps.model.TileOverlayOptions;
+import com.google.android.gms.maps.model.TileProvider;
+import com.google.android.gms.maps.model.UrlTileProvider;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
@@ -41,6 +49,7 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
+import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
@@ -56,8 +65,11 @@ import com.taimar198.weatherongooglemap.ui.base.OnGetData;
 import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -118,6 +130,41 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<WeatherForecastResponse> mClusterManager;
     private Random mRandom = new Random(1984);
     private Methods.OnGetWeatherInfo mWeatherListener;
+    private HeatmapTileProvider mProvider;
+    TileProvider tileProvider = new UrlTileProvider(256, 256) {
+        @Override
+        public URL getTileUrl(int x, int y, int zoom) {
+
+            /* Define the URL pattern for the tile images */
+//            String s = String.format("http://my.image.server/images/%d/%d/%d.png",
+//                    zoom, x, y);
+            String s = "https://tilecache.rainviewer.com/v2/radar/1600768200/256/3/52.37/4.31/5/0_0.png";
+
+//            if (!checkTileExists(x, y, zoom)) {
+//                return null;
+//            }
+
+            try {
+                return new URL(s);
+            } catch (MalformedURLException e) {
+                throw new AssertionError(e);
+            }
+        }
+
+        /*
+         * Check that the tile server supports the requested x, y and zoom.
+         * Complete this stub according to the tile range you support.
+         * If you support a limited range of tiles at different zoom levels, then you
+         * need to define the supported x, y range at each zoom level.
+         */
+        private boolean checkTileExists(int x, int y, int zoom) {
+            int minZoom = 12;
+            int maxZoom = 16;
+            return (zoom >= minZoom && zoom <= maxZoom);
+        }
+    };
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -260,6 +307,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         updateLocationUI();
         // Get the current location of the device and set the position of the map.
         getDeviceLocation();
+//        TileOverlay tileOverlay = mMap.addTileOverlay(new TileOverlayOptions()
+//                .tileProvider(tileProvider));
+//
+        LatLng NEWARK = new LatLng(21, 105);
+
+        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.custom_marker))
+                .position(NEWARK, 8600f, 6500f);
+
+// Add an overlay to the map, retaining a handle to the GroundOverlay object.
+        GroundOverlay imageOverlay = mMap.addGroundOverlay(newarkMap);
     }
 
 
@@ -368,12 +426,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         System.out.println(adapterView.getItemAtPosition(pos));
         String province = mSpinnerProvince.getSelectedItem().toString();
         String district = adapterView.getItemAtPosition(pos).toString();
-        mMap.clear();
+
         List<LatLng> latLngsFromAddress = new ArrayList<>();
         if (!province.equals("TỈNH") && !district.equals("HUYỆN") && !district.equals("TẤT CẢ")) {
+//            mMap.clear();
             List<LatLng> latLngs = mPlaceMarkList.getLocation()
                     .get(province)
                     .get(district);
+//            mProvider = new HeatmapTileProvider.Builder()
+//                    .data(latLngs)
+//                    .build();
+//            mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
             Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
                     .addAll(latLngs));
@@ -381,6 +444,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
             mMap.moveCamera(CameraUpdateFactory
                     .newLatLngZoom(latLngs.get(0), DISTRICT_ZOOM));
         }else if (district.equals("TẤT CẢ")) {
+//            mMap.clear();
             Map<String, List<LatLng>> districtList = mPlaceMarkList.getLocation()
                     .get(province);
             String[] disString = districtList.keySet().toArray(new String[0]);
@@ -392,6 +456,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                     Methods.getCoorsFromAddress(mWeatherApi, province, s, this);
                 }
             }
+
         }
 
     }
@@ -416,15 +481,17 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public boolean onClusterItemClick(WeatherForecastResponse item) {
+        System.out.println(item.getTitle());
         return false;
     }
 
     @Override
     public void onClusterItemInfoWindowClick(WeatherForecastResponse item) {
 
+        mClusterManager.getMarkerCollection().showAll();
     }
 
-
+/***https://stackoverflow.com/questions/25968486/how-to-add-info-window-for-clustering-marker-in-android*/
     @Override
     public void OnGetWeatherInfoSuccess(WeatherForecastResponse weatherForecastResponse) {
         mClusterManager = new ClusterManager<>(this, mMap);
@@ -432,11 +499,12 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mMap.setOnCameraIdleListener(mClusterManager);
         mMap.setOnMarkerClickListener(mClusterManager);
         mMap.setOnInfoWindowClickListener(mClusterManager);
+        mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
+        mClusterManager.getMarkerCollection().setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
         mClusterManager.setOnClusterClickListener(this);
         mClusterManager.setOnClusterInfoWindowClickListener(this);
         mClusterManager.setOnClusterItemClickListener(this);
         mClusterManager.setOnClusterItemInfoWindowClickListener(this);
-
         mClusterManager.addItem(weatherForecastResponse);
         mClusterManager.cluster();
     }

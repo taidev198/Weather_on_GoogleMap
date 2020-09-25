@@ -28,6 +28,8 @@ public class WeatherForecastResponse implements ClusterItem {
     @SerializedName("hourly")
     private List<CurrentWeatherResponse> hourlyWeatherList;
 
+    private String title;
+    private String snippet;
     private String Address;
 
     public String getAddress() {
@@ -87,12 +89,20 @@ public class WeatherForecastResponse implements ClusterItem {
     @Nullable
     @Override
     public String getTitle() {
-        return null;
+        return String.valueOf(currentWeather.getTemp());
     }
 
     @Nullable
     @Override
     public String getSnippet() {
-        return null;
+        return currentWeather.getWeathers().get(0).getDescription();
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public void setSnippet(String snippet) {
+        this.snippet = snippet;
     }
 }

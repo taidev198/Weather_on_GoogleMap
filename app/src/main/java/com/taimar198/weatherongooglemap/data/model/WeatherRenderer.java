@@ -31,6 +31,7 @@ import java.util.List;
 public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastResponse> {
 
     private final IconGenerator mIconGenerator;
+    private final IconGenerator mIconWeather;
     private final IconGenerator mClusterIconGenerator;
     private final ImageView mImageView;
     private final ImageView mClusterImageView;
@@ -44,6 +45,7 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
         mMap = googleMap;
         mIconGenerator = new IconGenerator(mContext);
         mClusterIconGenerator = new IconGenerator(mContext);
+        mIconWeather = new IconGenerator(mContext);
         LayoutInflater inflater = (LayoutInflater)context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View multiProfile = inflater.inflate(R.layout.multi_profile, null);
         mClusterIconGenerator.setContentView(multiProfile);
@@ -53,8 +55,10 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
         mDimension = (int) mContext.getResources().getDimension(R.dimen.custom_profile_image);
         mImageView.setLayoutParams(new ViewGroup.LayoutParams(mDimension, mDimension));
         int padding = (int) mContext.getResources().getDimension(R.dimen.custom_profile_padding);
-        mImageView.setPadding(padding, padding, padding, padding);
+      //  mImageView.setPadding(padding, padding, padding, padding);
+        ((ViewGroup)mTempText.getParent()).removeView(mTempText);
         mIconGenerator.setContentView(mImageView);
+//        mIconWeather.setContentView(mImageView);
     }
 
     @Override
@@ -68,7 +72,6 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
     protected void onClusterItemUpdated(@NonNull WeatherForecastResponse weatherForecastResponse, Marker marker) {
         // Same implementation as onBeforeClusterItemRendered() (to update cached markers)
         marker.setIcon(getItemIcon(weatherForecastResponse));
-        marker.setTitle("tai");
     }
 
     /**
@@ -94,6 +97,15 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
     }
 
     @Override
+    protected void onClusterItemRendered(@NonNull WeatherForecastResponse clusterItem, @NonNull Marker marker) {
+        super.onClusterItemRendered(clusterItem, marker);
+//        getMarker(clusterItem).setTitle("tai");
+        marker.setTitle(clusterItem.getTitle());
+        marker.setSnippet(clusterItem.getAddress());
+        getMarker(clusterItem).showInfoWindow();
+    }
+
+    @Override
     protected void onClusterUpdated(@NonNull Cluster<WeatherForecastResponse> cluster, Marker marker) {
         // Same implementation as onBeforeClusterRendered() (to update cached markers)
         marker.setIcon(getClusterIcon(cluster));
@@ -110,7 +122,7 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
         List<Drawable> profilePhotos = new ArrayList<>(Math.min(4, cluster.getSize()));
         int width = mDimension;
         int height = mDimension;
-
+        System.out.println(cluster.getSize());
         for (WeatherForecastResponse p : cluster.getItems()) {
             // Draw 4 at most.
             if (profilePhotos.size() == 4) break;
@@ -122,6 +134,8 @@ public class WeatherRenderer extends DefaultClusterRenderer<WeatherForecastRespo
         multiDrawable.setBounds(0, 0, width, height);
 
         mClusterImageView.setImageDrawable(multiDrawable);
+        System.out.println(cluster.getItems().iterator().next().getCurrentWeather().getTemp());
+        mTempText.setText(Double.toString(cluster.getItems().iterator().next().getCurrentWeather().getTemp()));
         Bitmap icon = mClusterIconGenerator.makeIcon(String.valueOf(cluster.getSize()));
         return BitmapDescriptorFactory.fromBitmap(icon);
     }
