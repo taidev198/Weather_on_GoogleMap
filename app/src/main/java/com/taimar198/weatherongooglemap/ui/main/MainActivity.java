@@ -101,7 +101,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ActivityCompat.OnRequestPermissionsResultCallback,
         ParserCoorFromKML.OnParsingData,
         AdapterView.OnItemSelectedListener,
-        OnGetData<LatLng>,
+        Methods.OnGetWeatherInfoFromAddress,
         Methods.OnGetWeatherInfo,
         ClusterManager.OnClusterClickListener<WeatherForecastResponse>,
         ClusterManager.OnClusterInfoWindowClickListener<WeatherForecastResponse>,
@@ -126,7 +126,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private ClusterManager<WeatherResponse> mCMWeather;
     private FragmentStatePagerAdapter pagerAdapter;
     private ArrayList<LatLng>  mLatLngList = new ArrayList<>();
-    private OnGetData<LatLng> mListener;
+    private Methods.OnGetWeatherInfoFromAddress mListener;
     private ClusterManager<WeatherForecastResponse> mClusterManager;
     private Random mRandom = new Random(1984);
     private Methods.OnGetWeatherInfo mWeatherListener;
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                         title(place.getAddress()));
                 System.out.println(place.getAddress());
                 Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(place.getLatLng().latitude),
-                        Double.toString(place.getLatLng().longitude), mWeatherListener);
+                        Double.toString(place.getLatLng().longitude), place.getAddress(),"", mWeatherListener);
             }
 
             @Override
@@ -372,7 +372,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //                                            new LatLng(lastKnownLocation.getLatitude(),
 //                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                                     Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
-                                            Double.toString(lastKnownLocation.getLongitude()), mWeatherListener);
+                                            Double.toString(lastKnownLocation.getLongitude()), address, "", mWeatherListener);
                                     Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
                                     intent.putExtra("NewString", "tai");
                                     getApplicationContext().sendBroadcast(intent);
@@ -403,16 +403,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         aa.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         //Setting the ArrayAdapter data on the Spinner
         mSpinnerProvince.setAdapter(aa);
-    }
-
-    @Override
-    public void onSuccess(LatLng latLng) {
-        System.out.println(latLng.latitude + "----" + latLng.longitude);
-       Methods.fetchingWeatherForecast(mWeatherApi,
-               Double.toString(latLng.latitude),
-               Double.toString(latLng.longitude),
-               this);
-//        addMarkerToMap(latLng);
     }
 
     @Override
@@ -513,6 +503,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void OnGetWeatherInfoFailure(Exception e) {
+
+    }
+
+    @Override
+    public void OnGetWeatherInfoFromAddressSuccess(LatLng latLng, String province, String district) {
+        Methods.fetchingWeatherForecast(mWeatherApi,
+                Double.toString(latLng.latitude),
+                Double.toString(latLng.longitude),
+                province,
+                district,
+                this);
+    }
+
+    @Override
+    public void OnGetWeatherInfoFromAddressFailure(Exception e) {
 
     }
 }

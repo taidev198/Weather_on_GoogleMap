@@ -23,23 +23,20 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter{
         mWeatherForecastResponse = weatherForecastResponse;
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     public View getInfoWindow(Marker marker) {
         // Getting view from the layout file
-        View v = mInflater.inflate(R.layout.multi_profile, null);
-
-//        ImageView icon = v.findViewById(R.id.icon_wether);
-        // Populate fields
-//        TextView title =  v.findViewById(R.id.tv_info_window_title);
-//        title.setText(marker.getTitle());
-
-        TextView description =  v.findViewById(R.id.temp_marker);
-        description.setText(mWeatherForecastResponse.getAddress());
-//        TextView temp = v.findViewById(R.id.temp);
-//        temp.setText((int) mCurrentWeather.getTemp().getTemperature()+ Constants.DEGREE);
-//        TextView location = v.findViewById(R.id.location);
-//        location.setText(mCurrentWeather.getLocation().getCity());
-        // Return info window contents
+        View v = mInflater.inflate(R.layout.infowindow, null);
+        TextView description =  v.findViewById(R.id.text_des_iw);
+        description.setText(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
+        System.out.println(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
+        TextView temp = v.findViewById(R.id.text_temp_iw);
+        temp.setText(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
+        System.out.println(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
+        TextView address = v.findViewById(R.id.text_add_iw);
+        address.setText(mWeatherForecastResponse.getAddress());
+        System.out.println(mWeatherForecastResponse.getAddress());
         return v;
     }
 

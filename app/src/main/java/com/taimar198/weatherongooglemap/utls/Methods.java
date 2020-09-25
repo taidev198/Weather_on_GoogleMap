@@ -48,7 +48,8 @@ import io.reactivex.schedulers.Schedulers;
 public class Methods {
 
 
-    public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, OnGetWeatherInfo listener) {
+    public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, String province, String district,
+                                               OnGetWeatherInfo listener) {
         weatherApi.requestRepos(lat,
                 lon,
                 "hourly,daily",
@@ -63,6 +64,7 @@ public class Methods {
                     }
                     @Override
                     public void onNext(WeatherForecastResponse weatherForecastResponses) {
+                        weatherForecastResponses.setAddress(district + "," + province);
                         listener.OnGetWeatherInfoSuccess(weatherForecastResponses);
                     }
 
@@ -79,7 +81,7 @@ public class Methods {
     }
 
 
-    public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, OnGetData<LatLng> listener) {
+    public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, OnGetWeatherInfoFromAddress listener) {
         weatherApi.getCoors("https://maps.googleapis.com/maps/api/geocode/json?address="
                 + district + Constants.COMMA+province + "&key=" + "AIzaSyAqdRuDwUbXJTQ1WwdIIR6_F3k3etpb5Og")
                 .subscribeOn(Schedulers.io())
@@ -92,8 +94,9 @@ public class Methods {
 
                     @Override
                     public void onNext(GeocodingResponse geocodingResponse) {
-                        listener.onSuccess((new LatLng(geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLat(),
-                                            geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLon())));
+                        listener.OnGetWeatherInfoFromAddressSuccess(new LatLng(geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLat(),
+                                            geocodingResponse.getResultsResponseList().get(0).getGeometryResponse().getLocation().getLon()),
+                                province, district);
                     }
 
                     @Override
@@ -215,4 +218,8 @@ public class Methods {
         void OnGetWeatherInfoFailure(Exception e);
     }
 
+    public interface OnGetWeatherInfoFromAddress{
+        void OnGetWeatherInfoFromAddressSuccess(LatLng latLng, String province, String district);
+        void OnGetWeatherInfoFromAddressFailure(Exception e);
+    }
 }
