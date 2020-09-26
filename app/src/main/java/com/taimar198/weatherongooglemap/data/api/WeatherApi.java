@@ -8,6 +8,7 @@ import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
 import java.util.List;
 
 import io.reactivex.Observable;
+import okhttp3.ResponseBody;
 import retrofit2.http.GET;
 import retrofit2.http.Query;
 import retrofit2.http.Url;
@@ -29,4 +30,6 @@ public interface WeatherApi {
                                                            @Query("appid") String api);
     @GET
     Observable<GeocodingResponse> getCoors(@Url String url);
+    @GET
+    Observable<ResponseBody> downloadImage(@Url String url);
 }

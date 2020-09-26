@@ -3,10 +3,18 @@ package com.taimar198.weatherongooglemap.utls;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
+import androidx.core.content.ContextCompat;
+
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.constants.Constants;
@@ -18,6 +26,7 @@ import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastRespons
 import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
+import com.taimar198.weatherongooglemap.data.model.Weather;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
 import com.taimar198.weatherongooglemap.ui.base.OnGetData;
 import com.taimar198.weatherongooglemap.ui.main.CardAdapter;
@@ -44,6 +53,7 @@ import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
+import okhttp3.ResponseBody;
 
 public class Methods {
 
@@ -109,6 +119,37 @@ public class Methods {
 
                     }
                 });
+    }
+
+    /**https://stackoverflow.com/questions/24158321/use-retrofit-to-download-image-file*/
+    public static void DownloadImage(WeatherApi weatherApi, String url, OnDownloadImage listener){
+
+        weatherApi.downloadImage(url)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<ResponseBody>() {
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(ResponseBody responseBody) {
+                        Bitmap bm = BitmapFactory.decodeStream(responseBody.byteStream());
+                        listener.OnDownloadImageSuccess(bm);
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+
+                    }
+
+                    @Override
+                    public void onComplete() {
+
+                    }
+                });
+
     }
 
     public static PlaceMarkList getPlaceMarkList(Context context) {
@@ -208,6 +249,18 @@ public class Methods {
         return df.format(c);
     }
 
+    public static BitmapDescriptor bitmapDescriptorFromVector(Context context, @DrawableRes int vectorDrawableResourceId) {
+        Drawable background = ContextCompat.getDrawable(context, R.drawable.ic_launcher_background);
+        background.setBounds(0, 0, background.getIntrinsicWidth(), background.getIntrinsicHeight());
+        Drawable vectorDrawable = ContextCompat.getDrawable(context, vectorDrawableResourceId);
+        vectorDrawable.setBounds(0, 0, vectorDrawable.getIntrinsicWidth() + 40, vectorDrawable.getIntrinsicHeight() + 20);
+        Bitmap bitmap = Bitmap.createBitmap(background.getIntrinsicWidth(), background.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        //background.draw(canvas);
+        vectorDrawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
     public static int getDrawable(String name, Context context) {
         return context.getResources().getIdentifier("icon_" + name,
                 "drawable",
@@ -221,5 +274,10 @@ public class Methods {
     public interface OnGetWeatherInfoFromAddress{
         void OnGetWeatherInfoFromAddressSuccess(LatLng latLng, String province, String district);
         void OnGetWeatherInfoFromAddressFailure(Exception e);
+    }
+
+    public interface OnDownloadImage{
+        void OnDownloadImageSuccess(Bitmap bitmap);
+        void OnDownloadImageFailure(Exception e);
     }
 }

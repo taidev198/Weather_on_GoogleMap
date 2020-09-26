@@ -2,6 +2,7 @@ package com.taimar198.weatherongooglemap.ui.main;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -107,7 +108,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ClusterManager.OnClusterClickListener<WeatherForecastResponse>,
         ClusterManager.OnClusterInfoWindowClickListener<WeatherForecastResponse>,
         ClusterManager.OnClusterItemClickListener<WeatherForecastResponse>,
-        ClusterManager.OnClusterItemInfoWindowClickListener<WeatherForecastResponse>, GoogleMap.OnInfoWindowClickListener {
+        ClusterManager.OnClusterItemInfoWindowClickListener<WeatherForecastResponse>,
+        GoogleMap.OnInfoWindowClickListener,
+        Methods.OnDownloadImage {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -291,15 +294,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 //        TileOverlay tileOverlay = mMap.addTileOverlay(new TileOverlayOptions()
 //                .tileProvider(tileProvider));
 //
-        LatLng NEWARK = new LatLng(22, 105);
-
-        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.title))
-                .position(NEWARK, 500f, 500f);
-
-// Add an overlay to the map, retaining a handle to the GroundOverlay object.
-        GroundOverlay imageOverlay = mMap.addGroundOverlay(newarkMap);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(NEWARK));
+        Methods.DownloadImage(mWeatherApi,"https://tilecache.rainviewer.com/v2/radar/1601124000/1024/5/21.2/105.5/5/0_0.png", this);
     }
 
 
@@ -394,28 +389,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int pos, long l) {
-        System.out.println(mSpinnerProvince.getSelectedItem().toString());
-        System.out.println(adapterView.getItemAtPosition(pos));
         String province = mSpinnerProvince.getSelectedItem().toString();
         String district = adapterView.getItemAtPosition(pos).toString();
 
         List<LatLng> latLngsFromAddress = new ArrayList<>();
         if (!province.equals("TỈNH") && !district.equals("HUYỆN") && !district.equals("TẤT CẢ")) {
-            mMap.clear();
             List<LatLng> latLngs = mPlaceMarkList.getLocation()
                     .get(province)
                     .get(district);
-//            mProvider = new HeatmapTileProvider.Builder()
-//                    .data(latLngs)
-//                    .build();
-//            mMap.addTileOverlay(new TileOverlayOptions().tileProvider(mProvider));
             Polyline polyline1 = mMap.addPolyline(new PolylineOptions()
                     .clickable(true)
                     .addAll(latLngs));
           Methods.getCoorsFromAddress(mWeatherApi, province, district, this);
 
         }else if (district.equals("TẤT CẢ")) {
-            mMap.clear();
             Map<String, List<LatLng>> districtList = mPlaceMarkList.getLocation()
                     .get(province);
             String[] disString = districtList.keySet().toArray(new String[0]);
@@ -510,5 +497,23 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     @Override
     public void onInfoWindowClick(Marker marker) {
         marker.showInfoWindow();
+    }
+
+    @Override
+    public void OnDownloadImageSuccess(Bitmap bitmap) {
+        LatLng NEWARK = new LatLng(21, 105);
+        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromBitmap(bitmap))
+                .position(NEWARK, 450000f, 450000f);
+
+// Add an overlay to the map, retaining a handle to the GroundOverlay object.
+        GroundOverlay imageOverlay = mMap.addGroundOverlay(newarkMap);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(NEWARK, DEFAULT_ZOOM));
+
+    }
+
+    @Override
+    public void OnDownloadImageFailure(Exception e) {
+
     }
 }
