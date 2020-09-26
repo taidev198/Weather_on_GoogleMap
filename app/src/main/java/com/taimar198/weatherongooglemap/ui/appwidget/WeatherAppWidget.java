@@ -9,6 +9,8 @@ import android.os.StrictMode;
 import android.widget.RemoteViews;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
+import com.taimar198.weatherongooglemap.ui.main.MainActivity;
+
 import java.net.InetAddress;
 
 /**
@@ -23,17 +25,21 @@ public class WeatherAppWidget extends AppWidgetProvider {
     public static String UPDATE_ACTION = "ActionUpdateWeatherWidget";
     public static final String ACTION_TEXT_CHANGED = "com.taimar198.weatherongooglemap.ui.appwidget.TEXT_CHANGED";
 
+    /**https://stackoverflow.com/questions/21866086/how-to-open-application-by-clicking-widget*/
     static void updateAppWidget(Context context, AppWidgetManager appWidgetManager,
                                 int appWidgetId) {
 
         RemoteViews views = new RemoteViews(context.getPackageName(), R.layout.weather_app_widget);
         /** PendingIntent to launch the MainActivity when the widget was clicked **/
-        Intent intent = new Intent(context, WeatherAppWidget.class);
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT);
-        views.setOnClickPendingIntent(R.id.date_weather_text, pendingIntent);
+        Intent intent = new Intent(context, MainActivity.class);
+//        PendingIntent pendingIntent = PendingIntent.getBroadcast(context,
+//                0,
+//                intent,
+//                PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+//        views.setOnClickPendingIntent(R.id.date_weather_text, pendingIntent);
+//        views.setOnClickPendingIntent(R.id.address_weather_text, pendingIntent);
+        views.setOnClickPendingIntent(R.id.icon_weather_widget, pendingIntent);
         appWidgetManager.updateAppWidget(appWidgetId, views);
 
     }
