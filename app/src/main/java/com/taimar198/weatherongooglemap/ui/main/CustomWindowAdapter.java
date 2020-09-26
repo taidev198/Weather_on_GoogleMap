@@ -30,18 +30,25 @@ public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter{
         View v = mInflater.inflate(R.layout.infowindow, null);
         TextView description =  v.findViewById(R.id.text_des_iw);
         description.setText(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
-        System.out.println(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
-        TextView temp = v.findViewById(R.id.text_temp_iw);
-        temp.setText(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
-        System.out.println(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
         TextView address = v.findViewById(R.id.text_add_iw);
         address.setText(mWeatherForecastResponse.getAddress());
-        System.out.println(mWeatherForecastResponse.getAddress());
+        TextView temp = v.findViewById(R.id.text_temp_iw);
+        temp.setText(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
         return v;
     }
 
     @Override
     public View getInfoContents(Marker marker) {
+//        View v = mInflater.inflate(R.layout.infowindow, null);
+//        TextView description =  v.findViewById(R.id.text_des_iw);
+//        description.setText(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
+//        System.out.println(mWeatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription());
+//        TextView temp = v.findViewById(R.id.text_temp_iw);
+//        temp.setText(Float.toString(mWeatherForecastResponse.getCurrentWeather().getTemp()));
+//        System.out.println(mWeatherForecastResponse.getCurrentWeather().getTemp());
+//        TextView address = v.findViewById(R.id.text_add_iw);
+//        address.setText(mWeatherForecastResponse.getAddress());
+//        System.out.println(mWeatherForecastResponse.getAddress());
         return null;
     }
 }

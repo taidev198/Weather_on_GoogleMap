@@ -19,8 +19,9 @@
         android:id="@+id/text_des_iw"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
         android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/text_temp_iw"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_add_iw" />
@@ -29,8 +30,9 @@
         android:id="@+id/text_temp_iw"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:textAlignment="center"
         android:text="TextView"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/text_des_iw" />
