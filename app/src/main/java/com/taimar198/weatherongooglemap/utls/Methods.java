@@ -1,5 +1,6 @@
 package com.taimar198.weatherongooglemap.utls;
 
+import android.annotation.SuppressLint;
 import android.appwidget.AppWidgetManager;
 import android.content.ComponentName;
 import android.content.Context;
@@ -122,9 +123,18 @@ public class Methods {
     }
 
     /**https://stackoverflow.com/questions/24158321/use-retrofit-to-download-image-file*/
-    public static void DownloadImage(WeatherApi weatherApi, String url, OnDownloadImage listener){
+    public static void DownloadImage(WeatherApi weatherApi, double lat, double lon, OnDownloadImage listener){
 
-        weatherApi.downloadImage(url)
+        @SuppressLint("DefaultLocale") String urlFormatted =
+                String.format("https://tilecache.rainviewer.com/v2/radar/1601988600/%d/%d/%f/%f/%d/0_0.png",
+                        Constants.IMAGE_SIZE,
+                        3,
+                        lat,
+                        lon,
+                        Constants.IMAGE_COLOR);
+
+        System.out.println(urlFormatted);
+        weatherApi.downloadImage(urlFormatted)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<ResponseBody>() {
@@ -136,7 +146,7 @@ public class Methods {
                     @Override
                     public void onNext(ResponseBody responseBody) {
                         Bitmap bm = BitmapFactory.decodeStream(responseBody.byteStream());
-                        listener.OnDownloadImageSuccess(bm);
+                        listener.OnDownloadImageSuccess(new LatLng(lat, lon), bm);
                     }
 
                     @Override
@@ -277,7 +287,7 @@ public class Methods {
     }
 
     public interface OnDownloadImage{
-        void OnDownloadImageSuccess(Bitmap bitmap);
+        void OnDownloadImageSuccess(LatLng latLng, Bitmap bitmap);
         void OnDownloadImageFailure(Exception e);
     }
 }

@@ -40,6 +40,9 @@ public class Constants {
     public static final String QUERY = "q";
     public static final String COMMA = ",";
 
+    public static final int IMAGE_SIZE = 1024;
+    public static final int IMAGE_COLOR = 5;
+
     public static final int INDEX_0 = 0;
     public static final int INDEX_1 = 1;
     public static final int INDEX_2 = 2;
