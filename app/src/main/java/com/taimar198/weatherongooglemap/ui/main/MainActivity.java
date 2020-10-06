@@ -11,6 +11,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.Spinner;
 
@@ -72,6 +73,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
@@ -110,7 +112,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ClusterManager.OnClusterItemClickListener<WeatherForecastResponse>,
         ClusterManager.OnClusterItemInfoWindowClickListener<WeatherForecastResponse>,
         GoogleMap.OnInfoWindowClickListener,
-        Methods.OnDownloadImage {
+        Methods.OnDownloadImage,
+        View.OnClickListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -135,6 +138,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Random mRandom = new Random(1984);
     private Methods.OnGetWeatherInfo mWeatherListener;
     private HeatmapTileProvider mProvider;
+    private Map<Bitmap, LatLng> mRadar;
+    private Button mShowRadarBtn;
+    private GroundOverlay mGroundOverlay;
+    private boolean mIsRadarShown;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +156,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mWeatherListener = this;
         mSpinnerProvince = findViewById(R.id.spinner_province);
         mSpinnerDistrict = findViewById(R.id.spinner_district);
+        mShowRadarBtn = findViewById(R.id.showRadarStorm);
+        mShowRadarBtn.setOnClickListener(this);
+        mRadar = new HashMap<>();
         new ParserCoorFromKML(getApplicationContext(), this).execute();
         mWeatherForecastResponse = new WeatherForecastResponse();
         mPager = findViewById(R.id.weather_pager);
@@ -501,13 +511,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void OnDownloadImageSuccess(LatLng latLng, Bitmap bitmap) {
-        GroundOverlayOptions newarkMap = new GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromBitmap(bitmap))
-                .position(latLng, 450000f, 450000f);
 
-// Add an overlay to the map, retaining a handle to the GroundOverlay object.
-        GroundOverlay imageOverlay = mMap.addGroundOverlay(newarkMap);
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
+        if (mRadar.size() == 0) {
+            mRadar.put(bitmap, latLng);
+        }
 
     }
 
@@ -515,4 +523,32 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void OnDownloadImageFailure(Exception e) {
 
     }
+
+    @Override
+    public void onClick(View view) {
+
+        if (!mIsRadarShown)
+            showRadar();
+        else hideRadar();
+    }
+
+    private void showRadar() {
+        if (!mIsRadarShown) {
+            Bitmap bitmap = mRadar.keySet().toArray(new Bitmap[0])[0];
+            GroundOverlayOptions newarkMap = new GroundOverlayOptions()
+                    .image(BitmapDescriptorFactory.fromBitmap(bitmap))
+                    .position(mRadar.get(bitmap), 450000f, 450000f);
+
+// Add an overlay to the map, retaining a handle to the GroundOverlay object.
+            mGroundOverlay = mMap.addGroundOverlay(newarkMap);
+            mIsRadarShown = !mIsRadarShown;
+        }
+
+    }
+
+   private void hideRadar() {
+        mGroundOverlay.remove();
+        mIsRadarShown = !mIsRadarShown;
+   }
+
 }
