@@ -1,8 +1,13 @@
 package com.taimar198.weatherongooglemap.ui.main;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Address;
 import android.location.Geocoder;
 import android.location.Location;
@@ -113,7 +118,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         ClusterManager.OnClusterItemInfoWindowClickListener<WeatherForecastResponse>,
         GoogleMap.OnInfoWindowClickListener,
         Methods.OnDownloadImage,
-        View.OnClickListener {
+        View.OnClickListener,
+        SensorEventListener {
 
     private static final int LOCATION_PERMISSION_REQUEST_CODE = 1;
     private static final int PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 123;
@@ -142,6 +148,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Button mShowRadarBtn;
     private GroundOverlay mGroundOverlay;
     private boolean mIsRadarShown;
+    private SensorManager mSensorManager;
+    private Sensor mSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -149,6 +157,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         setContentView(R.layout.activity_main);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         init();
+    }
+
+    @Override
+    protected void onResume() {
+        // Register a listener for the sensor.
+        super.onResume();
+        mSensorManager.registerListener(this, mSensor, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    @Override
+    protected void onPause() {
+        // Be sure to unregister the sensor when the activity pauses.
+        super.onPause();
+        mSensorManager.unregisterListener(this);
     }
 
     private void init() {
@@ -162,6 +184,8 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         new ParserCoorFromKML(getApplicationContext(), this).execute();
         mWeatherForecastResponse = new WeatherForecastResponse();
         mPager = findViewById(R.id.weather_pager);
+        mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
         // Construct a FusedLocationProviderClient.
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mWeatherApi = UtilsApi.getAPIService();
@@ -546,9 +570,21 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-   private void hideRadar() {
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        float millibarsOfPressure = event.values[0];
+        // Do something with this sensor data.
+       // System.out.println(millibarsOfPressure + "temp");
+    }
+
+    @Override
+    public void onAccuracyChanged(Sensor sensor, int i) {
+
+    }
+
+    private void hideRadar() {
         mGroundOverlay.remove();
         mIsRadarShown = !mIsRadarShown;
-   }
+    }
 
 }
