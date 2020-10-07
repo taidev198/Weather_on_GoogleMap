@@ -360,42 +360,39 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         try {
             if (locationPermissionGranted) {
                 Task<Location> locationResult = fusedLocationProviderClient.getLastLocation();
-                locationResult.addOnCompleteListener(this, new OnCompleteListener<Location>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Location> task) {
-                        if (task.isSuccessful()) {
-                            lastKnownLocation = task.getResult();
-                            //get address from lat and long
-                            Geocoder geocoder;
-                            List<Address> addresses;
-                            geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
+                locationResult.addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        lastKnownLocation = task.getResult();
+                        //get address from lat and long
+                        Geocoder geocoder;
+                        List<Address> addresses;
+                        geocoder = new Geocoder(getApplicationContext(), Locale.getDefault());
 
-                            try {
-                                addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(),
-                                        lastKnownLocation.getLongitude(),
-                                        1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
-                                String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
-                                String city = addresses.get(0).getLocality();
-                                System.out.println(address + "---" + city);
-                                if (lastKnownLocation != null) {
-                                    mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
-                                            new LatLng(lastKnownLocation.getLatitude(),
-                                                    lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
-                                    Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
-                                            Double.toString(lastKnownLocation.getLongitude()), address, "", mWeatherListener);
-                                    Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
-                                    intent.putExtra("NewString", "tai");
-                                    getApplicationContext().sendBroadcast(intent);
-                                }
-                            } catch (IOException e) {
-                                e.printStackTrace();
+                        try {
+                            addresses = geocoder.getFromLocation(lastKnownLocation.getLatitude(),
+                                    lastKnownLocation.getLongitude(),
+                                    1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+                            String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+                            String city = addresses.get(0).getLocality();
+                            System.out.println(address + "---" + city);
+                            if (lastKnownLocation != null) {
+                                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
+                                        new LatLng(lastKnownLocation.getLatitude(),
+                                                lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
+                                Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
+                                        Double.toString(lastKnownLocation.getLongitude()), address, "", mWeatherListener);
+                                Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
+                                intent.putExtra("NewString", "tai");
+                                getApplicationContext().sendBroadcast(intent);
                             }
-                            // Set the map's camera position to the current location of the device.
-                        } else {
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                        // Set the map's camera position to the current location of the device.
+                    } else {
 
 //                            mMap.moveCamera(CameraUpdateFactory
 //                                    .newLatLngZoom(defaultLocation, DEFAULT_ZOOM));
-                        }
                     }
                 });
             }

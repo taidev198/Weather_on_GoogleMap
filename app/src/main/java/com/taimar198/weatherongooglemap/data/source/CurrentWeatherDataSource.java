@@ -1,6 +1,7 @@
 package com.taimar198.weatherongooglemap.data.source;
 
-import com.taimar198.weatherongooglemap.data.model.WeatherForecast;
+import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
+import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 
 public interface CurrentWeatherDataSource {
 
@@ -8,6 +9,11 @@ public interface CurrentWeatherDataSource {
         void onFetchDataSuccess(T data);
 
         void onFetchDataFailure(Exception e);
+    }
+
+    interface LocalDataSource {
+        CurrentWeather getCurrentWeather();
+        void SaveCurrentWeather(WeatherForecastResponse weatherForecastResponse);
     }
 
     interface RemoteDataSource {
