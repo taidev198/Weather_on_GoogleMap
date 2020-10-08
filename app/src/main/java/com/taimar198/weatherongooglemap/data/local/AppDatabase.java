@@ -5,7 +5,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import com.taimar198.weatherongooglemap.data.local.entry.WeatherEntry;
-
+/**https://stackoverflow.com/questions/23577825/android-save-object-as-blob-in-sqlite/23578035*/
 public class AppDatabase extends SQLiteOpenHelper {
 
     private static AppDatabase sAppDatabase;
