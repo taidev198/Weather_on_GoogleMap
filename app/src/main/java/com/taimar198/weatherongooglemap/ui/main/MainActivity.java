@@ -66,6 +66,7 @@ import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastRespons
 import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 import com.taimar198.weatherongooglemap.data.model.WeatherRenderer;
+import com.taimar198.weatherongooglemap.data.repository.WeatherRepository;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
@@ -133,23 +134,20 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Location lastKnownLocation;
     private WeatherForecastResponse mWeatherForecastResponse;
     private PlaceMarkList mPlaceMarkList;
-    private ViewPager mPager;
     private Spinner mSpinnerProvince;
     private Spinner mSpinnerDistrict;
-    private ClusterManager<WeatherResponse> mCMWeather;
-    private FragmentStatePagerAdapter pagerAdapter;
     private ArrayList<LatLng>  mLatLngList = new ArrayList<>();
     private Methods.OnGetWeatherInfoFromAddress mListener;
     private ClusterManager<WeatherForecastResponse> mClusterManager;
-    private Random mRandom = new Random(1984);
     private Methods.OnGetWeatherInfo mWeatherListener;
-    private HeatmapTileProvider mProvider;
+
     private Map<Bitmap, LatLng> mRadar;
     private Button mShowRadarBtn;
     private GroundOverlay mGroundOverlay;
     private boolean mIsRadarShown;
     private SensorManager mSensorManager;
     private Sensor mSensor;
+    private WeatherRepository mWeatherRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -174,6 +172,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
+        mWeatherRepository = WeatherRepository.getInstance();
         mListener = this;
         mWeatherListener = this;
         mSpinnerProvince = findViewById(R.id.spinner_province);
@@ -183,7 +182,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mRadar = new HashMap<>();
         new ParserCoorFromKML(getApplicationContext(), this).execute();
         mWeatherForecastResponse = new WeatherForecastResponse();
-        mPager = findViewById(R.id.weather_pager);
         mSensorManager = (SensorManager) getSystemService(Context.SENSOR_SERVICE);
         mSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_AMBIENT_TEMPERATURE);
         // Construct a FusedLocationProviderClient.

@@ -15,10 +15,9 @@ public class AppDatabase extends SQLiteOpenHelper {
 
     private static final String CREATE_TASK_TABLE = "CREATE TABLE " + WeatherEntry.TABLE_NAME + " ("
             + WeatherEntry.ID + " integer primary key, "
-            + WeatherEntry.WEATHER_DES + " text not null, "
-            + WeatherEntry.WEATHER_TEMP + " text, "
-            + WeatherEntry.ADDRESS + " text, "
-            + WeatherEntry.WEATHER_ICON + " text )";
+            + WeatherEntry.MARKER + " text not null, "
+            + WeatherEntry.RADAR + " text, "
+            + WeatherEntry.POLYLINE + " text )";
 
     private static final String DROP_WEATHER_TABLE = "DROP TABLE IF EXISTS " + WeatherEntry.TABLE_NAME;
     protected SQLiteDatabase mSQLiteDatabase;
