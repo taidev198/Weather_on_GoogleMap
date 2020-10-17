@@ -9,11 +9,11 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.maps.android.clustering.ClusterItem;
-import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.data.api.OnFetchDataListener;
 import com.taimar198.weatherongooglemap.data.service.DownloadImage;
-import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 
-public class WeatherResponse implements CurrentWeatherDataSource.OnFetchDataListener<Bitmap>, ClusterItem {
+
+public class WeatherResponse implements OnFetchDataListener<Bitmap>, ClusterItem {
 
     @Expose
     @SerializedName("description")

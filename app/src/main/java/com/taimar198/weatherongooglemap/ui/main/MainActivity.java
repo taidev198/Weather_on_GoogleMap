@@ -24,19 +24,14 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.fragment.app.FragmentPagerAdapter;
-import androidx.fragment.app.FragmentStatePagerAdapter;
-import androidx.viewpager.widget.ViewPager;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.GroundOverlay;
 import com.google.android.gms.maps.model.GroundOverlayOptions;
 import com.google.android.gms.maps.model.LatLng;
@@ -44,11 +39,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
-import com.google.android.gms.maps.model.TileOverlay;
-import com.google.android.gms.maps.model.TileOverlayOptions;
-import com.google.android.gms.maps.model.TileProvider;
-import com.google.android.gms.maps.model.UrlTileProvider;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.libraries.places.api.Places;
 import com.google.android.libraries.places.api.model.Place;
@@ -57,40 +47,25 @@ import com.google.android.libraries.places.widget.AutocompleteSupportFragment;
 import com.google.android.libraries.places.widget.listener.PlaceSelectionListener;
 import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
-import com.google.maps.android.heatmaps.HeatmapTileProvider;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
 import com.taimar198.weatherongooglemap.data.model.WeatherRenderer;
-import com.taimar198.weatherongooglemap.data.repository.WeatherRepository;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
-import com.taimar198.weatherongooglemap.ui.base.OnGetData;
 import com.taimar198.weatherongooglemap.utls.Methods;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-
-import io.reactivex.Observer;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
 /**https://guides.codepath.com/android/Google-Maps-API-v2-Usage
  * https://stackoverflow.com/questions/15636303/extract-coordinates-from-kml-file-in-java
@@ -147,7 +122,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean mIsRadarShown;
     private SensorManager mSensorManager;
     private Sensor mSensor;
-    private WeatherRepository mWeatherRepository;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -172,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private void init() {
-        mWeatherRepository = WeatherRepository.getInstance();
         mListener = this;
         mWeatherListener = this;
         mSpinnerProvince = findViewById(R.id.spinner_province);

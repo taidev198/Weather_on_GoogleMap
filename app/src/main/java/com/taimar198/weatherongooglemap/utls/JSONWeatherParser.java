@@ -5,7 +5,6 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 
 import com.google.gson.JsonParser;
-import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
 import com.taimar198.weatherongooglemap.data.model.DailyWeather;
 import com.taimar198.weatherongooglemap.data.model.HourlyWeather;
 import com.taimar198.weatherongooglemap.data.model.Location;

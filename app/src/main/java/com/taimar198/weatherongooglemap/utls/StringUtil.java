@@ -1,10 +1,6 @@
 package com.taimar198.weatherongooglemap.utls;
 
-import android.content.Context;
 import android.net.Uri;
-
-import com.taimar198.weatherongooglemap.BuildConfig;
-import com.taimar198.weatherongooglemap.R;
 import com.taimar198.weatherongooglemap.constants.Constants;
 
 import java.text.SimpleDateFormat;
@@ -108,58 +104,4 @@ public class StringUtil {
         String textHour = hourFormat.format(date);
         return textHour;
     }
-
-//    public static int getResIdOfBackgroundFromDevice() {
-//        Calendar calendar = Calendar.getInstance();
-//        SimpleDateFormat hourFormat = new SimpleDateFormat(Constant.FORMAT_HOUR);
-//        Date date = new Date(calendar.getTimeInMillis());
-//        int textHour = Integer.parseInt(hourFormat.format(date));
-//        if (textHour > 5 && textHour < 18) {
-//            return R.drawable.background_day;
-//        } else {
-//            return R.drawable.background_night;
-//        }
-//    }
-
-//    public static int getResIdOfIconFromName(String icon) {
-//        int resId = 0;
-//        switch (icon) {
-//            case IconWeather.ICON_CLEAR_DAY:
-//                resId = R.drawable.icon_clear_day;
-//                break;
-//            case IconWeather.ICON_CLEAR_NIGHT:
-//                resId = R.drawable.icon_clear_night;
-//                break;
-//            case IconWeather.ICON_RAIN:
-//                resId = R.drawable.icon_rain;
-//                break;
-//            case IconWeather.ICON_SNOW:
-//                resId = R.drawable.icon_snow;
-//                break;
-//            case IconWeather.ICON_SLEET:
-//                resId = R.drawable.icon_sleet;
-//                break;
-//            case IconWeather.ICON_WIND:
-//                resId = R.drawable.icon_wind;
-//                break;
-//            case IconWeather.ICON_FOG:
-//                resId = R.drawable.icon_fog;
-//                break;
-//            case IconWeather.ICON_CLOUDY:
-//                resId = R.drawable.icon_cloudy;
-//                break;
-//            case IconWeather.ICON_PARTLY_CLOUDY_DAY:
-//                resId = R.drawable.icon_partly_cloudy_day;
-//                break;
-//            case IconWeather.ICON_PARTLY_CLOUDY_NIGHT:
-//                resId = R.drawable.icon_partly_cloudy_night;
-//                break;
-//            default:
-//                resId = R.drawable.icon_cloudy;
-//                break;
-//        }
-//        return resId;
-//    }
-
-
 }

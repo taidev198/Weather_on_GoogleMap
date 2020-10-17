@@ -3,16 +3,12 @@ package com.taimar198.weatherongooglemap.ui.main;
 import android.annotation.SuppressLint;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.model.Marker;
 import com.taimar198.weatherongooglemap.R;
-import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
-import com.taimar198.weatherongooglemap.data.model.CurrentWeather;
-import com.taimar198.weatherongooglemap.data.source.CurrentWeatherDataSource;
 
 public class CustomWindowAdapter implements GoogleMap.InfoWindowAdapter{
     LayoutInflater mInflater;
