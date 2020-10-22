@@ -27,6 +27,7 @@ public class Constants {
     public static final String BREAK_LINE = "\n";
     public static final int TIME_DETAIL = 1000;
     public static final String SPACE = " ";
+    public static final String CELSIUS = "°C";
 
     public static final String FORMAT_YEAR_MONTH_DAY = "YYYY, EEE MMM dd";
     public static final String FORMAT_HOUR_2 = "HH:mm";

@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.widget.RemoteViews;
 import androidx.core.content.ContextCompat;
 import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherResponse;
@@ -50,9 +51,7 @@ public class GPSWidgetService extends Service implements OnGetData<WeatherForeca
         @Override
         public void onLocationChanged(Location location) {
 //            AppLog.logString("Service.onLocationChanged()");
-
             updateCoordinates(location.getLatitude(), location.getLongitude());
-
             stopSelf();
         }
     };
@@ -184,9 +183,9 @@ public class GPSWidgetService extends Service implements OnGetData<WeatherForeca
                 .get(0)
                 .getDescription());
 
-        remoteViews.setTextViewText(R.id.temp_widget, String.valueOf(weatherForecastResponse
+        remoteViews.setTextViewText(R.id.temp_widget, String.valueOf(Math.round(weatherForecastResponse
                 .getCurrentWeather()
-                .getTemp()));
+                .getTemp()))+ Constants.CELSIUS);
         // Apply the changes
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
     }
