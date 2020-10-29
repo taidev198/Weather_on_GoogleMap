@@ -49,6 +49,7 @@ import com.google.maps.android.clustering.Cluster;
 import com.google.maps.android.clustering.ClusterManager;
 import com.taimar198.weatherongooglemap.BuildConfig;
 import com.taimar198.weatherongooglemap.R;
+import com.taimar198.weatherongooglemap.constants.Constants;
 import com.taimar198.weatherongooglemap.data.api.UtilsApi;
 import com.taimar198.weatherongooglemap.data.api.WeatherApi;
 import com.taimar198.weatherongooglemap.data.api.response.WeatherForecastResponse;
@@ -166,19 +167,6 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         //init autocomplete
         initAutocomplete();
 
-    }
-
-    private void initCluster() {
-        mClusterManager = new ClusterManager<>(this, mMap);
-        mClusterManager.setRenderer(new WeatherRenderer(this, mMap, mClusterManager));
-        mMap.setOnCameraIdleListener(mClusterManager);
-        mMap.setOnMarkerClickListener(mClusterManager);
-        mMap.setOnInfoWindowClickListener(mClusterManager);
-
-        mClusterManager.setOnClusterClickListener(this);
-        mClusterManager.setOnClusterInfoWindowClickListener(this);
-        mClusterManager.setOnClusterItemClickListener(this);
-        mClusterManager.setOnClusterItemInfoWindowClickListener(this);
     }
 
     private void initAutocomplete() {
@@ -352,6 +340,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                                 lastKnownLocation.getLongitude()), DEFAULT_ZOOM));
                                 Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(lastKnownLocation.getLatitude()),
                                         Double.toString(lastKnownLocation.getLongitude()), address, "", mWeatherListener);
+                                Methods.DownloadImage(mWeatherApi, lastKnownLocation.getLatitude(), lastKnownLocation.getLongitude(), this);
                                 Intent intent = new Intent(WeatherAppWidget.ACTION_TEXT_CHANGED);
                                 intent.putExtra("NewString", "tai");
                                 getApplicationContext().sendBroadcast(intent);
@@ -455,21 +444,11 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
  * https://stackoverflow.com/questions/21885225/showing-custom-infowindow-for-android-maps-utility-library-for-android/21964693#21964693*/
     @Override
     public void OnGetWeatherInfoSuccess(WeatherForecastResponse weatherForecastResponse) {
-//        initCluster();
-//        mClusterManager.getMarkerCollection()
-//                .setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
-//        mMap.setInfoWindowAdapter(mClusterManager.getMarkerManager());
-//        mClusterManager.addItem(weatherForecastResponse);
-//        mClusterManager.getMarkerCollection().showAll();
-//        mClusterManager.cluster();
-
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(Methods.getDrawable(weatherForecastResponse.getCurrentWeather().getWeathers().get(0).getIcon(), this)))
                 .position(weatherForecastResponse.getPosition())
         .snippet(weatherForecastResponse.getCurrentWeather().getWeathers().get(0).getDescription())
         .title(weatherForecastResponse.getAddress()));
-//        mMap.setInfoWindowAdapter(new CustomWindowAdapter(getLayoutInflater(), weatherForecastResponse));
-//        mMap.setOnInfoWindowClickListener(this);
         marker.showInfoWindow();
     }
 
@@ -505,10 +484,10 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     public void OnDownloadImageSuccess(LatLng latLng, Bitmap bitmap) {
 
 //        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, DEFAULT_ZOOM));
-        if (mRadar.size() == 0) {
-            mRadar.put(bitmap, latLng);
+        if (mRadar.size() != 0) {
+            mRadar.clear();
         }
-
+        mRadar.put(bitmap, latLng);
     }
 
     @Override

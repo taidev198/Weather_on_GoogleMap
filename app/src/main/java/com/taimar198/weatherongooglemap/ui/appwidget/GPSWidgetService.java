@@ -152,6 +152,7 @@ public class GPSWidgetService extends Service implements OnGetData<WeatherForeca
                             Double.toString(longitude),
                             info,
                             mListener);
+                    System.out.println(addresses+ "address");
                 }
                 else {
                     info += addresses.get(0).getFeatureName() + ", " + addresses.get(0).getSubAdminArea() + ", " + addresses.get(0).getAdminArea();
@@ -183,9 +184,9 @@ public class GPSWidgetService extends Service implements OnGetData<WeatherForeca
                 .get(0)
                 .getDescription());
 
-        remoteViews.setTextViewText(R.id.temp_widget, String.valueOf(Math.round(weatherForecastResponse
+        remoteViews.setTextViewText(R.id.temp_widget, Math.round(weatherForecastResponse
                 .getCurrentWeather()
-                .getTemp()))+ Constants.CELSIUS);
+                .getTemp()) + Constants.CELSIUS);
         // Apply the changes
         appWidgetManager.updateAppWidget(watchWidget, remoteViews);
     }

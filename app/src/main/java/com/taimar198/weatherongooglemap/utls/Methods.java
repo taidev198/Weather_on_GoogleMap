@@ -118,7 +118,7 @@ public class Methods {
     public static void DownloadImage(WeatherApi weatherApi, double lat, double lon, OnDownloadImage listener){
 
         @SuppressLint("DefaultLocale") String urlFormatted =
-                String.format("https://tilecache.rainviewer.com/v2/radar/1601988600/%d/%d/%f/%f/%d/0_0.png",
+                String.format("https://tilecache.rainviewer.com/v2/radar/1603428600/%d/%d/%f/%f/%d/0_0.png",
                         Constants.IMAGE_SIZE,
                         3,
                         lat,
