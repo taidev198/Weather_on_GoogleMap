@@ -31,6 +31,24 @@ public class WeatherForecastResponse implements ClusterItem {
     private String title;
     private String snippet;
     private String Address;
+    private int id;
+    private WeatherForecastResponse data;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public WeatherForecastResponse getData() {
+        return data;
+    }
+
+    public void setData(WeatherForecastResponse data) {
+        this.data = data;
+    }
 
     public String getAddress() {
         return Address;

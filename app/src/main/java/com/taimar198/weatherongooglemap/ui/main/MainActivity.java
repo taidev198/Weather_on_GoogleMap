@@ -58,7 +58,12 @@ import com.taimar198.weatherongooglemap.data.model.WeatherRenderer;
 import com.taimar198.weatherongooglemap.data.service.ParserCoorFromKML;
 import com.taimar198.weatherongooglemap.ui.addressspinner.SpinnerProvinceListener;
 import com.taimar198.weatherongooglemap.ui.appwidget.WeatherAppWidget;
+import com.taimar198.weatherongooglemap.utls.DataBaseHelper;
+import com.taimar198.weatherongooglemap.utls.DataOpenHelper;
+import com.taimar198.weatherongooglemap.utls.DataOpenHelper1;
 import com.taimar198.weatherongooglemap.utls.Methods;
+
+import net.sqlcipher.database.SQLiteDatabase;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -116,14 +121,16 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
     private Methods.OnGetWeatherInfoFromAddress mListener;
     private ClusterManager<WeatherForecastResponse> mClusterManager;
     private Methods.OnGetWeatherInfo mWeatherListener;
-
+    private DataOpenHelper dataOpenHelper;
+    private DataOpenHelper1 dataOpenHelper1;
     private Map<Bitmap, LatLng> mRadar;
     private Button mShowRadarBtn;
     private GroundOverlay mGroundOverlay;
     private boolean mIsRadarShown;
     private SensorManager mSensorManager;
     private Sensor mSensor;
-
+    private SQLiteDatabase sqLiteDatabase;
+    private DataBaseHelper dataBaseHelper;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,6 +159,9 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
         mSpinnerProvince = findViewById(R.id.spinner_province);
         mSpinnerDistrict = findViewById(R.id.spinner_district);
         mShowRadarBtn = findViewById(R.id.showRadarStorm);
+        SQLiteDatabase.loadLibs(this);
+         dataBaseHelper = DataBaseHelper.getInstance(this);
+
         mShowRadarBtn.setOnClickListener(this);
         mRadar = new HashMap<>();
         new ParserCoorFromKML(getApplicationContext(), this).execute();
@@ -194,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mMap.addMarker(new MarkerOptions().position(new LatLng(place.getLatLng().latitude,
                         place.getLatLng().longitude)).
                         title(place.getAddress()));
-                System.out.println(place.getAddress());
+                //System.out.println(place.getAddress());
                 Methods.fetchingWeatherForecast(mWeatherApi, Double.toString(place.getLatLng().latitude),
                         Double.toString(place.getLatLng().longitude), place.getAddress(),"", mWeatherListener);
             }
@@ -333,7 +343,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
                                     1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
                             String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
                             String city = addresses.get(0).getLocality();
-                            System.out.println(address + "---" + city);
+                            //System.out.println(address + "---" + city);
                             if (lastKnownLocation != null) {
                                 mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(
                                         new LatLng(lastKnownLocation.getLatitude(),
@@ -444,6 +454,7 @@ public class MainActivity extends AppCompatActivity implements OnMapReadyCallbac
  * https://stackoverflow.com/questions/21885225/showing-custom-infowindow-for-android-maps-utility-library-for-android/21964693#21964693*/
     @Override
     public void OnGetWeatherInfoSuccess(WeatherForecastResponse weatherForecastResponse) {
+        dataBaseHelper.insert(weatherForecastResponse);
         Marker marker = mMap.addMarker(new MarkerOptions()
                 .icon(BitmapDescriptorFactory.fromResource(Methods.getDrawable(weatherForecastResponse.getCurrentWeather().getWeathers().get(0).getIcon(), this)))
                 .position(weatherForecastResponse.getPosition())

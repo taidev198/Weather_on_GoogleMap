@@ -31,8 +31,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,14 +46,32 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.crypto.Cipher;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 import okhttp3.ResponseBody;
-
+//https://blog.mindorks.com/securing-api-keys-using-android-ndk
+//https://androidsecurity.info/storing-your-secure-information-in-the-ndk/
+//https://stackoverflow.com/questions/45803390/classpathloader-cant-find-native-lib-with-abi-arm64-v8a
+//ndk.abiFilters 'arm64-v8a' in config build.gradle support for specific device
+//https://developer.android.com/studio/projects/android-library
+//https://androidsecurity.info/storing-your-secure-information-in-the-ndk/
+//https://erev0s.com/blog/add-jnicc-your-existing-android-app/
 public class Methods {
-
+    private static String key;
+      static  {
+        System.loadLibrary("native-lib");
+    }
+    public static native String  stringFromJNI();
+//    static String GetAPIKey() {
+//       key =  stringFromJNI();
+//    }
 
     public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, String province, String district,
                                                OnGetWeatherInfo listener) {
@@ -118,7 +140,7 @@ public class Methods {
     public static void DownloadImage(WeatherApi weatherApi, double lat, double lon, OnDownloadImage listener){
 
         @SuppressLint("DefaultLocale") String urlFormatted =
-                String.format("https://tilecache.rainviewer.com/v2/radar/1603428600/%d/%d/%f/%f/%d/0_0.png",
+                String.format("https://tilecache.rainviewer.com/v2/radar/1604020200/%d/%d/%f/%f/%d/0_0.png",
                         Constants.IMAGE_SIZE,
                         3,
                         lat,
@@ -153,9 +175,18 @@ public class Methods {
                 });
 
     }
-
+//https://stackoverflow.com/questions/4275311/how-to-encrypt-and-decrypt-file-in-android/8041442
     public static PlaceMarkList getPlaceMarkList(Context context) {
-        InputStream in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
+        InputStream in_s = null;
+        System.out.println("keyyyyyyyy" + stringFromJNI());
+        try {
+             in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
+            byte[] key = generateKey(stringFromJNI());
+           byte[] encode =  decodeFile(key, encodeFile(key, toByteArray(in_s)));
+            in_s = new ByteArrayInputStream(encode);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         PlaceMarkList placeMarkList = new PlaceMarkList();
         List<PlaceMark> mPlaceMarkList = new ArrayList<>();
         Map<String, Map<String, List<LatLng>>> mLocation = new LinkedHashMap<>();
@@ -205,6 +236,57 @@ public class Methods {
         placeMarkList.setPlaceMarkList(mPlaceMarkList);
         placeMarkList.setLocation(mLocation);
             return placeMarkList;
+    }
+
+    public  static byte[] toByteArray(InputStream in) throws IOException {
+
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+
+        byte[] buffer = new byte[1024];
+        int len;
+
+        // read bytes from the input stream and store them in buffer
+        while ((len = in.read(buffer)) != -1) {
+            // write bytes from the buffer into output stream
+            os.write(buffer, 0, len);
+        }
+        return os.toByteArray();
+    }
+
+
+
+    public static byte[] generateKey(String password) throws Exception
+    {
+        byte[] keyStart = password.getBytes("UTF-8");
+
+        KeyGenerator kgen = KeyGenerator.getInstance("AES");
+        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", new CryptoProvider());
+        sr.setSeed(keyStart);
+        kgen.init(128, sr);
+        SecretKey skey = kgen.generateKey();
+        return skey.getEncoded();
+    }
+
+    public static byte[] encodeFile(byte[] key, byte[] fileData) throws Exception
+    {
+
+        SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
+        byte[] encrypted = cipher.doFinal(fileData);
+
+        return encrypted;
+    }
+
+    public static byte[] decodeFile(byte[] key, byte[] fileData) throws Exception
+    {
+        SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
+        Cipher cipher = Cipher.getInstance("AES");
+        cipher.init(Cipher.DECRYPT_MODE, skeySpec);
+
+        byte[] decrypted = cipher.doFinal(fileData);
+
+        return decrypted;
     }
 
     public static void fetchingWeather(final Context context, WeatherApi weatherApi, String lat, String lon, String address,
