@@ -8,12 +8,16 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.widget.RemoteViews;
 import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.gms.common.util.IOUtils;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
@@ -34,11 +38,16 @@ import org.jsoup.select.Elements;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
@@ -65,13 +74,15 @@ import okhttp3.ResponseBody;
 //https://erev0s.com/blog/add-jnicc-your-existing-android-app/
 public class Methods {
     private static String key;
-      static  {
+    private static Context mContext;
+
+    static  {
         System.loadLibrary("native-lib");
     }
     public static native String  stringFromJNI();
-//    static String GetAPIKey() {
-//       key =  stringFromJNI();
-//    }
+    public static native String  getMapAPIKey();
+    public static native String  getGEOAPIKey();
+    public static native String  getFile();
 
     public static void fetchingWeatherForecast(WeatherApi weatherApi, String lat, String lon, String province, String district,
                                                OnGetWeatherInfo listener) {
@@ -80,7 +91,7 @@ public class Methods {
                 "hourly,daily",
                 "vi",
                 "metric",
-                "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
+                getMapAPIKey()).subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<WeatherForecastResponse>() {
                     @Override
@@ -108,7 +119,7 @@ public class Methods {
 
     public static void getCoorsFromAddress(WeatherApi weatherApi, String province, String district, OnGetWeatherInfoFromAddress listener) {
         weatherApi.getCoors("https://maps.googleapis.com/maps/api/geocode/json?address="
-                + district + Constants.COMMA+province + "&key=" + "AIzaSyAqdRuDwUbXJTQ1WwdIIR6_F3k3etpb5Og")
+                + district + Constants.COMMA+province + "&key=" + getGEOAPIKey())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(new Observer<GeocodingResponse>() {
@@ -175,15 +186,22 @@ public class Methods {
                 });
 
     }
+//https://stackoverflow.com/questions/1769776/how-can-i-write-a-byte-array-to-a-file-in-java
 //https://stackoverflow.com/questions/4275311/how-to-encrypt-and-decrypt-file-in-android/8041442
+    @RequiresApi(api = Build.VERSION_CODES.O)
     public static PlaceMarkList getPlaceMarkList(Context context) {
         InputStream in_s = null;
-        System.out.println("keyyyyyyyy" + stringFromJNI());
+        mContext = context;
         try {
-             in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
-            byte[] key = generateKey(stringFromJNI());
-           byte[] encode =  decodeFile(key, encodeFile(key, toByteArray(in_s)));
-            in_s = new ByteArrayInputStream(encode);
+            in_s = context.getResources().openRawResource(R.raw.diaphanhuyen);
+          //  Uri.fromFile(new File("//assets/data1.txt")).getPath();
+//            byte[] key = generateKey(stringFromJNI());
+////            System.out.println("byteeeeeeeee1" + Arrays.toString(encodeFile(key, toByteArray(in_s))));
+//         //   byte[] data = Files.readAllBytes(Paths.get(Uri.fromFile(new File("//assets/data1.txt")).getPath()));
+//            byte[] data = toByteArray(mContext.getAssets().open("data1.txt"));
+//            System.out.println("byteeeeeeeee" + Arrays.toString(data));
+//            byte[] encode =  decodeFile(key, data);
+//            in_s = new ByteArrayInputStream(encode);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -260,33 +278,33 @@ public class Methods {
         byte[] keyStart = password.getBytes("UTF-8");
 
         KeyGenerator kgen = KeyGenerator.getInstance("AES");
-        SecureRandom sr = SecureRandom.getInstance("SHA1PRNG", new CryptoProvider());
-        sr.setSeed(keyStart);
-        kgen.init(128, sr);
+       // SecureRandom sr = SecureRandom.getInstance("AES");
+       // sr.setSeed(keyStart);
+        kgen.init(256);
         SecretKey skey = kgen.generateKey();
+//        System.out.println("keyyyyyyyy" + Arrays.toString(skey.getEncoded()));
         return skey.getEncoded();
     }
-
-    public static byte[] encodeFile(byte[] key, byte[] fileData) throws Exception
-    {
-
+//https://developer.android.com/guide/topics/security/cryptography
+    public static byte[] encodeFile(byte[] key, byte[] fileData) throws Exception {
         SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.ENCRYPT_MODE, skeySpec);
         byte[] encrypted = cipher.doFinal(fileData);
-
+        System.out.println("keyyyyyyyy" + Arrays.toString(encrypted));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Files.write(Paths.get(mContext.getDataDir() + "/data1.txt"), encrypted);
+            System.out.println("pathhhhhhhhhhhh" + mContext.getCacheDir() + "/data.txt");
+        }
         return encrypted;
     }
 
-    public static byte[] decodeFile(byte[] key, byte[] fileData) throws Exception
-    {
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static byte[] decodeFile(byte[] key, byte[] fileData) throws Exception {
         SecretKeySpec skeySpec = new SecretKeySpec(key, "AES");
         Cipher cipher = Cipher.getInstance("AES");
         cipher.init(Cipher.DECRYPT_MODE, skeySpec);
-
-        byte[] decrypted = cipher.doFinal(fileData);
-
-        return decrypted;
+        return cipher.doFinal(fileData);
     }
 
     public static void fetchingWeather(final Context context, WeatherApi weatherApi, String lat, String lon, String address,
@@ -301,7 +319,7 @@ public class Methods {
                     "hourly,daily",
                     "vi",
                     "metric",
-                    "e370756ec8af6d31ce5f25668bf0bee8").subscribeOn(Schedulers.io())
+                    getMapAPIKey()).subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(new Observer<WeatherForecastResponse>() {
                         @Override

@@ -2,6 +2,9 @@ package com.taimar198.weatherongooglemap.data.service;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.Build;
+
+import androidx.annotation.RequiresApi;
 
 import com.taimar198.weatherongooglemap.data.model.PlaceMark;
 import com.taimar198.weatherongooglemap.data.model.PlaceMarkList;
@@ -21,6 +24,7 @@ public class ParserCoorFromKML extends AsyncTask<Void, Void, PlaceMarkList> {
     }
 
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     protected PlaceMarkList doInBackground(Void... voids) {
 
